@@ -1,0 +1,140 @@
+<!doctype linuxdoc system>
+
+<article>
+<title>Tiny Graphics Interface
+<author>Silver Dream !, <htmlurl url="mailto:silverdr@wfmh.org.pl" name="silverdr@wfmh.org.pl">
+<date>2014-03-22
+
+<abstract>
+Documentation for Tiny Graphics Interface (aka TGI) - a minimal, cross-target
+graphics manipulation framework for cc65.
+</abstract>
+
+<!-- Table of contents -->
+<toc>
+
+<!-- Begin the document -->
+<sect>Introduction<p>
+
+The Tiny Graphics Interface or in short version: TGI is a graphics
+manipulation framework allowing relatively easy multi-target development for
+applications where using pixel graphics capabilities is required.
+
+Next to typical graphics functions like setting/clearing pixels,
+drawing lines and ellipses it provides a set of scalable vector fonts
+which make graphics screen inscriptions in various styles and sizes possible
+without much effort.
+
+The clear advantage over any hand-crafted, target specific rutines lies in
+portability across cc65 supported targets. Please note, however that not all
+functions are implemented on all cc65 supported targets and for some targets
+several drivers may exist, which implement different subset of TGI functions.
+
+Please refer to target specific information for details on which TGI
+functions are fully implemented for which target and driver.
+<p>
+
+<sect>Getting started<p>
+
+Starting TGI based development is - in fact - quite easy. The obvious prerequisite
+is to include the appropriate header file(s):
+
+<tt>#include &lt;tgi.h&gt;</tt>
+
+<sect>Reading and writing sectors<p>
+
+The read and write functions are:
+
+<tscreen><verb>
+    unsigned char __fastcall__ dio_read (dhandle_t handle,
+                                         unsigned sect_num,
+                                         void *buffer);
+</verb></tscreen>
+
+This function will read the sector specified by <tt>sect_num</tt> into the memory
+location at buffer.
+
+<tscreen><verb>
+    unsigned char __fastcall__ dio_write (dhandle_t handle,
+                                          unsigned sect_num,
+                                          const void *buffer);
+</verb></tscreen>
+
+This function will write the memory contents at buffer to the sector specified
+by <tt>sect_num</tt>. No verify is performed.
+
+<tscreen><verb>
+    unsigned char __fastcall__ dio_write_verify (dhandle_t handle,
+                                                 unsigned sect_num,
+                                                 const void *buffer);
+</verb></tscreen>
+
+This function will write the memory contents at buffer to the sector specified
+by <tt>sect_num</tt>. A verification is performed.
+<p>
+
+Use the <tt><ref name="dio_query_sectsize" id="sectsizecount"></tt> function to query
+the size of a sector and the <tt><ref name="dio_query_sectcount" id="sectsizecount"></tt>
+function to query the number of available sectors.
+<p>
+
+All these functions will return 0 for success and an OS specific error code in
+case of failure.
+<p>
+
+<sect>Querying sector size and count<label id="sectsizecount"><p>
+
+Some systems support multiple diskette formats which have different sector sizes
+and/or different sector counts.
+<p>
+
+The following function returns the sector size of the currently inserted disk:
+
+<tscreen><verb>
+    unsigned __fastcall__ dio_query_sectsize (dhandle_t handle);
+</verb></tscreen>
+
+On the Atari platform, the sector size is handled specially. Please refer
+to the DIO section in the <htmlurl url="atari.html" name="Atari">
+specific platform documentation.
+<p>
+
+The following function returns the sector count of the currently inserted disk:
+
+<tscreen><verb>
+    unsigned __fastcall__ dio_query_sectcount (dhandle_t handle);
+</verb></tscreen>
+
+<sect>Converting sector numbers<p>
+
+Since the read and write functions expect a sector number, for systems where
+the sectors aren't addressed by a logical sector number (e.g. CBM devices),
+there are 2 conversion functions. One of them converts a logical sector number
+to a head/track/sector triple. The other conversion function works the other
+way round.
+
+<tscreen><verb>
+    unsigned char __fastcall__ dio_phys_to_log (dhandle_t handle,
+                                                const dio_phys_pos *physpos,
+                                                unsigned *sectnum);
+</verb></tscreen>
+
+This function converts track/head/sector to logical sector number.
+
+<tscreen><verb>
+    unsigned char __fastcall__ dio_log_to_phys (dhandle_t handle,
+                                                const unsigned *sectnum,
+                                                dio_phys_pos *physpos);
+</verb></tscreen>
+
+This function converts a logical sector number to track/head/sector notation.
+<p>
+
+Note, that on systems which natively use logical sector numbers (e.g. Atari),
+the conversion functions are dummies. They ignore head/track
+(<tt>dio_phys_to_log</tt>) or return them as zero (<tt>dio_log_to_phys</tt>).
+The logical sector number is returned as physical sector and vice versa.
+<p>
+
+
+</article>
