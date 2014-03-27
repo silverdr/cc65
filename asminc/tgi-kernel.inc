@@ -57,7 +57,8 @@
             DONE            .addr       ; DONE routine
             GETERROR        .addr       ; GETERROR routine
             CONTROL         .addr       ; CONTROL routine
-            CLEAR           .addr       ; CLEAR routine
+;            CLEAR           .addr       ; CLEAR routine
+            FILL            .addr       ; FILL routine
             SETVIEWPAGE     .addr       ; SETVIEWPAGE routine
             SETDRAWPAGE     .addr       ; SETDRAWPAGE routine
             SETCOLOR        .addr       ; SETCOLOR routine
@@ -155,6 +156,7 @@ TGI_CLIP_TOP            = $08
         .global tgi_geterror
         .global tgi_control
         .global tgi_clear
+        .global tgi_filldrawpage
         .global tgi_setviewpage
         .global tgi_setdrawpage
         .global tgi_setcolor
@@ -191,6 +193,7 @@ TGI_CLIP_TOP            = $08
         .global _tgi_bar
         .global _tgi_circle
         .global _tgi_clear
+        .global _tgi_filldrawpage
         .global _tgi_done
         .global _tgi_ellipse
         .global _tgi_getaspectratio

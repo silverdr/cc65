@@ -12,7 +12,6 @@
 
         .macpack        generic
 
-
 ; ------------------------------------------------------------------------
 ; Header. Includes jump table and constants.
 
@@ -42,7 +41,8 @@
         .addr   DONE
         .addr   GETERROR
         .addr   CONTROL
-        .addr   CLEAR
+;        .addr   CLEAR
+        .addr   FILL
         .addr   SETVIEWPAGE
         .addr   SETDRAWPAGE
         .addr   SETCOLOR
@@ -87,6 +87,8 @@ ERROR:          .res    1       ; Error code
 PALETTE:        .res    2       ; The current palette
 
 BITMASK:        .res    1       ; $00 = clear, $FF = set pixels
+COLOR0:         .res    1       ; set by FILL
+COLOR1:         .res    1       ; set by SETCOLOR
 
 ; INIT/DONE
 OLDD018:        .res    1       ; Old register value
@@ -235,12 +237,15 @@ CONTROL:
         rts
 
 ; ------------------------------------------------------------------------
-; CLEAR: Clears the screen.
+; FILL: Clears/fills the screen.
 ;
 ; Must set an error code: NO
 ;
 
-CLEAR:  ldy     #$00
+FILL:
+        sta     COLOR0
+        jsr     setcolormap
+        ldy     #$00
         tya
 @L1:    sta     VBASE+$0000,y
         sta     VBASE+$0100,y
@@ -306,11 +311,16 @@ SETDRAWPAGE:
 ;
 
 SETCOLOR:
-        tax
+        cmp     COLOR0
         beq     @L1
-        lda     #$FF
-@L1:    sta     BITMASK
+        sta     COLOR1
+        jsr     setcolormap
+@L2:    lda     #$FF
+        bne     @L3
+@L1:    lda     #$00
+@L3:    sta     BITMASK
         rts
+
 
 ; ------------------------------------------------------------------------
 ; SETPALETTE: Set the palette (not available with all drivers/hardware).
@@ -331,32 +341,11 @@ SETPALETTE:
 ; Get the color entries from the palette
 
         lda     PALETTE+1       ; Foreground color
-        asl     a
-        asl     a
-        asl     a
-        asl     a
-        ora     PALETTE         ; Background color
-        tax
+        sta     COLOR1
+        lda     PALETTE         ; Background color
+        sta     COLOR0
 
-; Initialize the color map with the new color settings (it is below the
-; I/O area)
-
-        ldy     #$00
-        sei
-        lda     $01             ; Get ROM config
-        pha                     ; Save it
-        and     #%11111100      ; Clear bit 0 and 1
-        sta     $01
-        txa                     ; Load color code
-@L2:    sta     CBASE+$0000,y
-        sta     CBASE+$0100,y
-        sta     CBASE+$0200,y
-        sta     CBASE+$0300,y
-        iny
-        bne     @L2
-        pla
-        sta     $01
-        cli
+        jsr     setcolormap
 
 ; Done, reset the error code
 
@@ -872,7 +861,7 @@ TEXTSTYLE:
 OUTTEXT:
 
 ; Calculate a pointer to the representation of the character in the
-; character ROM 
+; character ROM
 
         ldx     #((>(CHARROM + $0800)) >> 3)
         ldy     #0
@@ -959,3 +948,33 @@ CALC:   lda     Y1
         rts
 
 
+; private function used by SETPALETTE and FILL
+setcolormap:
+        lda     COLOR1
+        asl     a
+        asl     a
+        asl     a
+        asl     a
+        ora     COLOR0         ; Background color
+        tax
+
+; Initialize the color map with the new color settings (it is below the
+; I/O area)
+
+        ldy     #$00
+        sei
+        lda     $01             ; Get ROM config
+        pha                     ; Save it
+        and     #%11111100      ; Clear bit 0 and 1 (get to the RAM below I/O)
+        sta     $01
+        txa                     ; Load color code
+@L2:    sta     CBASE+$0000,y
+        sta     CBASE+$0100,y
+        sta     CBASE+$0200,y
+        sta     CBASE+$0300,y
+        iny
+        bne     @L2
+        pla
+        sta     $01
+        cli
+        rts

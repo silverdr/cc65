@@ -68,7 +68,8 @@ tgi_init:           jmp     $0000
 tgi_done:           jmp     $0000
 tgi_geterror:       jmp     $0000
 tgi_control:        jmp     $0000
-tgi_clear:          jmp     $0000
+;tgi_clear:          jmp     $0000
+tgi_filldrawpage:   jmp     $0000
 tgi_setviewpage:    jmp     $0000
 tgi_setdrawpage:    jmp     $0000
 tgi_setcolor:       jmp     $0000

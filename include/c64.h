@@ -66,21 +66,22 @@
 #define COLOR_WHITE             0x01
 #define COLOR_RED               0x02
 #define COLOR_CYAN              0x03
-#define COLOR_VIOLET            0x04
-#define COLOR_PURPLE            COLOR_VIOLET
+#define COLOR_PURPLE            0x04
 #define COLOR_GREEN             0x05
 #define COLOR_BLUE              0x06
 #define COLOR_YELLOW            0x07
 #define COLOR_ORANGE            0x08
 #define COLOR_BROWN             0x09
 #define COLOR_LIGHTRED          0x0A
-#define COLOR_GRAY1             0x0B
-#define COLOR_GRAY2             0x0C
+#define COLOR_DARKGRAY          0x0B
+#define COLOR_GRAY              0x0C
 #define COLOR_LIGHTGREEN        0x0D
 #define COLOR_LIGHTBLUE         0x0E
-#define COLOR_GRAY3             0x0F
+#define COLOR_LIGHTGRAY         0x0F
 
 /* TGI color defines */
+
+/*
 #define TGI_COLOR_BLACK         COLOR_BLACK
 #define TGI_COLOR_WHITE         COLOR_WHITE
 #define TGI_COLOR_RED           COLOR_RED
@@ -98,6 +99,7 @@
 #define TGI_COLOR_LIGHTGREEN    COLOR_LIGHTGREEN
 #define TGI_COLOR_LIGHTBLUE     COLOR_LIGHTBLUE
 #define TGI_COLOR_GRAY3         COLOR_GRAY3
+*/
 
 /* Define hardware */
 #include <_vic2.h>

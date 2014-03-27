@@ -28,7 +28,7 @@
 void __fastcall__ pen_calibrate (unsigned char *XOffset)
 {
     unsigned char oldBg = bgcolor (COLOR_BLUE);
-    unsigned char oldText = textcolor (COLOR_GRAY3);
+    unsigned char oldText = textcolor (COLOR_LIGHTGRAY);
     unsigned char oldRev = revers (1);
     unsigned char sprite0Color = VIC.spr_color[0];
     unsigned char width, width2, height, height4, height8;
@@ -51,7 +51,7 @@ void __fastcall__ pen_calibrate (unsigned char *XOffset)
     cputsxy (width2 - (sizeof COMMAND1) / 2, height / 2 + 1, COMMAND1);
     cputsxy (width2 - (sizeof COMMAND2) / 2, height / 2 + 3, COMMAND2);
 
-    VIC.spr_color[0] = COLOR_GRAY2;
+    VIC.spr_color[0] = COLOR_GRAY;
     mouse_show ();
     mouse_move (width2 * 8, height8 / 2);
 

@@ -30,6 +30,11 @@
 /*    distribution.                                                          */
 /*                                                                           */
 /*****************************************************************************/
+/*                                                                           */
+/* Changes to the original version by:                                       */
+/* 2014 - silverdr@wfmh.org.pl                                               */
+/*                                                                           */
+/*****************************************************************************/
 
 
 
@@ -49,6 +54,29 @@
 /*****************************************************************************/
 
 
+
+/* Default colours set, which has to be supported by all drivers, even */
+/* if the actual representation may be different than the name implies */
+#define TGI_COLOR_BLACK         COLOR_BLACK
+#define TGI_COLOR_WHITE         COLOR_WHITE
+#define TGI_COLOR_RED           COLOR_RED
+#define TGI_COLOR_CYAN          COLOR_CYAN
+#define TGI_COLOR_PURPLE        COLOR_PURPLE
+#define TGI_COLOR_GREEN         COLOR_GREEN
+#define TGI_COLOR_BLUE          COLOR_BLUE
+#define TGI_COLOR_YELLOW        COLOR_YELLOW
+#define TGI_COLOR_ORANGE        COLOR_ORANGE
+#define TGI_COLOR_BROWN         COLOR_BROWN
+#define TGI_COLOR_LIGHTRED      COLOR_LIGHTRED
+#define TGI_COLOR_DARKGRAY      COLOR_DARKGRAY
+#define TGI_COLOR_GRAY          COLOR_GRAY
+#define TGI_COLOR_LIGHTGREEN    COLOR_LIGHTGREEN
+#define TGI_COLOR_LIGHTBLUE     COLOR_LIGHTBLUE
+#define TGI_COLOR_LIGHTGRAY     COLOR_LIGHTGRAY
+/* Alternative GREY spelling variants */
+#define TGI_COLOR_DARKGREY      COLOR_DARKGRAY
+#define TGI_COLOR_GREY          COLOR_GRAY
+#define TGI_COLOR_LIGHTGREY     COLOR_LIGHTGRAY
 
 /* Font constants for use with tgi_settextstyle */
 #define TGI_FONT_BITMAP         0
@@ -122,8 +150,8 @@ unsigned char tgi_geterror (void);
 const char* __fastcall__ tgi_geterrormsg (unsigned char code);
 /* Get an error message describing the error in code. */
 
-void tgi_clear (void);
-/* Clear the drawpage. */
+void __fastcall__ tgi_filldrawpage (unsigned char color);
+/* Clear/fill the drawpage with requested colour */
 
 unsigned tgi_getpagecount (void);
 /* Returns the number of screen pages available. */
@@ -275,10 +303,11 @@ unsigned __fastcall__ tgi_ioctl (unsigned char code, void* data);
  * for unknown codes or values.
  */
 
+int __fastcall__ tgi_imulround (int rhs, int lhs);
+/* Helper function for functions using sine/cosine: Multiply two values, one
+ * being an 8.8 fixed point one, and return the rounded and scaled result.
+ */
 
 
 /* End of tgi.h */
 #endif
-
-
-
