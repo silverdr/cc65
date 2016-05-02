@@ -65,6 +65,8 @@ typedef enum {
     FEAT_C_COMMENTS,
     FEAT_FORCE_RANGE,
     FEAT_UNDERLINE_IN_NUMBERS,
+    FEAT_ADDRSIZE,
+    FEAT_BRACKET_AS_INDIRECT,
 
     /* Special value: Number of features available */
     FEAT_COUNT
@@ -80,14 +82,14 @@ typedef enum {
 
 feature_t FindFeature (const StrBuf* Key);
 /* Find the feature in a table and return the corresponding enum value. If the
- * feature is invalid, return FEAT_UNKNOWN.
- */
+** feature is invalid, return FEAT_UNKNOWN.
+*/
 
 feature_t SetFeature (const StrBuf* Key);
 /* Find the feature and set the corresponding flag if the feature is known.
- * In any case, return the feature found. An invalid Key will return
- * FEAT_UNKNOWN.
- */
+** In any case, return the feature found. An invalid Key will return
+** FEAT_UNKNOWN.
+*/
 
 
 

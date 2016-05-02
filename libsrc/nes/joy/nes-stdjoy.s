@@ -12,11 +12,13 @@
         .include        "joy-error.inc"
         .include        "nes.inc"
 
+        .macpack        module
+
 
 ; ------------------------------------------------------------------------
 ; Header. Includes jump table
 
-.segment        "JUMPTABLE"
+        module_header   _nes_stdjoy_joy
 
 ; Driver signature
 
@@ -93,9 +95,9 @@ READJOY:
         tay                     ; Joystick number (0,1) into Y
 
         lda     #1
-        sta     APU_PAD1,y
+        sta     APU_PAD1
         lda     #0
-        sta     APU_PAD1,y
+        sta     APU_PAD1
 
 ; Read joystick
 

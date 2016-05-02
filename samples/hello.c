@@ -1,16 +1,16 @@
 /*
- * Fancy hello world program using cc65.
- *
- * Ullrich von Bassewitz (ullrich@von-bassewitz.de)
- *
- */
+** Fancy hello world program using cc65.
+**
+** Ullrich von Bassewitz (ullrich@von-bassewitz.de)
+**
+*/
 
 
 
 #include <stdlib.h>
 #include <string.h>
 #include <conio.h>
-#include <dbg.h>
+#include <joystick.h>
 
 
 
@@ -68,8 +68,19 @@ int main (void)
     gotoxy ((XSize - strlen (Text)) / 2, YSize / 2);
     cprintf ("%s", Text);
 
+#if defined(__NES__) || defined(__PCE__) || defined(__GAMATE__)
+
+    /* Wait for the user to press a button */
+    joy_install (joy_static_stddrv);
+    while (!joy_read (JOY_1)) ;
+    joy_uninstall ();
+
+#else
+
     /* Wait for the user to press a key */
     (void) cgetc ();
+
+#endif
 
     /* Clear the screen again */
     clrscr ();
@@ -77,6 +88,3 @@ int main (void)
     /* Done */
     return EXIT_SUCCESS;
 }
-
-
-

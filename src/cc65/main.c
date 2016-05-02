@@ -6,7 +6,7 @@
 /*                                                                           */
 /*                                                                           */
 /*                                                                           */
-/* (C) 2000-2013, Ullrich von Bassewitz                                      */
+/* (C) 2000-2015, Ullrich von Bassewitz                                      */
 /*                Roemerstrasse 52                                           */
 /*                D-70794 Filderstadt                                        */
 /* EMail:         uz@cc65.org                                                */
@@ -104,6 +104,7 @@ static void Usage (void)
             "\n"
             "Long options:\n"
             "  --add-source\t\t\tInclude source as comment\n"
+            "  --all-cdecl\t\t\tMake functions default to __cdecl__\n"
             "  --bss-name seg\t\tSet the name of the BSS segment\n"
             "  --check-stack\t\t\tGenerate stack overflow checks\n"
             "  --code-name seg\t\tSet the name of the CODE segment\n"
@@ -158,6 +159,10 @@ static void SetSys (const char* Sys)
 
         case TGT_MODULE:
             AbEnd ("Cannot use `module' as a target for the compiler");
+            break;
+
+        case TGT_ATARI5200:
+            DefineNumericMacro ("__ATARI5200__", 1);
             break;
 
         case TGT_ATARI:
@@ -215,6 +220,10 @@ static void SetSys (const char* Sys)
             DefineNumericMacro ("__APPLE2ENH__", 1);
             break;
 
+        case TGT_GAMATE:
+            DefineNumericMacro ("__GAMATE__", 1);
+            break;
+
         case TGT_GEOS_CBM:
             /* Do not handle as a CBM system */
             DefineNumericMacro ("__GEOS__", 1);
@@ -252,6 +261,14 @@ static void SetSys (const char* Sys)
 
         case TGT_SIM65C02:
             DefineNumericMacro ("__SIM65C02__", 1);
+            break;
+
+        case TGT_OSIC1P:
+            DefineNumericMacro ("__OSIC1P__", 1);
+            break;
+
+        case TGT_PCENGINE:
+            DefineNumericMacro ("__PCE__", 1);
             break;
 
         default:
@@ -302,9 +319,9 @@ static void DefineSym (const char* Def)
         DefineNumericMacro (Def, 1);
     } else {
         /* We have a value, P points to the '=' character. Since the argument
-         * is const, create a copy and replace the '=' in the copy by a zero
-         * terminator.
-         */
+        ** is const, create a copy and replace the '=' in the copy by a zero
+        ** terminator.
+        */
         char* Q;
         unsigned Len = strlen (Def)+1;
         char* S = (char*) xmalloc (Len);
@@ -338,6 +355,15 @@ static void OptAddSource (const char* Opt attribute ((unused)),
 /* Add source lines as comments in generated assembler file */
 {
     AddSource = 1;
+}
+
+
+
+static void OptAllCDecl (const char* Opt attribute ((unused)),
+                         const char* Arg attribute ((unused)))
+/* Make functions default to cdecl instead of fastcall. */
+{
+    AutoCDecl = 1;
 }
 
 
@@ -464,13 +490,13 @@ static void OptDebugOpt (const char* Opt attribute ((unused)), const char* Arg)
     }
 
     /* Read line by line, ignore empty lines and switch optimization
-     * steps on/off.
-     */
+    ** steps on/off.
+    */
     while (fgets (Buf, sizeof (Buf), F) != 0) {
 
         /* Remove trailing control chars. This will also remove the
-         * trailing newline.
-         */
+        ** trailing newline.
+        */
         unsigned Len = strlen (Buf);
         while (Len > 0 && IsControl (Buf[Len-1])) {
             --Len;
@@ -484,8 +510,8 @@ static void OptDebugOpt (const char* Opt attribute ((unused)), const char* Arg)
         }
 
         /* Check the first character and enable/disable the step or
-         * ignore the line
-         */
+        ** ignore the line
+        */
         switch (*Line) {
 
             case '\0':
@@ -511,8 +537,8 @@ static void OptDebugOpt (const char* Opt attribute ((unused)), const char* Arg)
     }
 
     /* Close the file, no error check here since we were just reading and
-     * this is only a debug function.
-     */
+    ** this is only a debug function.
+    */
     (void) fclose (F);
 }
 
@@ -782,6 +808,7 @@ int main (int argc, char* argv[])
     /* Program long options */
     static const LongOpt OptTab[] = {
         { "--add-source",       0,      OptAddSource            },
+        { "--all-cdecl",        0,      OptAllCDecl             },
         { "--bss-name",         1,      OptBssName              },
         { "--check-stack",      0,      OptCheckStack           },
         { "--code-name",        1,      OptCodeName             },

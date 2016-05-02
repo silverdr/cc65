@@ -40,6 +40,7 @@
 #include "expr.h"
 #include "instr.h"
 #include "nexttok.h"
+#include "global.h"
 
 
 
@@ -53,6 +54,20 @@ void GetEA (EffAddr* A)
 /* Parse an effective address, return the result in A */
 {
     unsigned long Restrictions;
+    token_t IndirectEnter;
+    token_t IndirectLeave;
+    const char* IndirectExpect;
+
+    /* Choose syntax for indirection */
+    if (BracketAsIndirect) {
+        IndirectEnter = TOK_LBRACK;
+        IndirectLeave = TOK_RBRACK;
+        IndirectExpect = "']' expected";
+    } else {
+        IndirectEnter = TOK_LPAREN;
+        IndirectLeave = TOK_RPAREN;
+        IndirectExpect = "')' expected";
+    }
 
     /* Clear the output struct */
     A->AddrModeSet = 0;
@@ -97,8 +112,50 @@ void GetEA (EffAddr* A)
         NextTok ();
         A->AddrModeSet = AM65_ACCU;
 
+    } else if (CurTok.Tok == IndirectEnter) {
+
+        /* One of the indirect modes */
+        NextTok ();
+        A->Expr = Expression ();
+
+        if (CurTok.Tok == TOK_COMMA) {
+
+            /* (expr,X) or (rel,S),y */
+            NextTok ();
+            if (CurTok.Tok == TOK_X) {
+                /* (adr,x) */
+                NextTok ();
+                A->AddrModeSet = AM65_ABS_X_IND | AM65_DIR_X_IND;
+                Consume (IndirectLeave, IndirectExpect);
+            } else if (CurTok.Tok == TOK_S) {
+                /* (rel,s),y */
+                NextTok ();
+                A->AddrModeSet = AM65_STACK_REL_IND_Y;
+                Consume (IndirectLeave, IndirectExpect);
+                ConsumeComma ();
+                Consume (TOK_Y, "`Y' expected");
+            } else {
+                Error ("Syntax error");
+            }
+
+        } else {
+
+            /* (adr) or (adr),y */
+            Consume (IndirectLeave, IndirectExpect);
+            if (CurTok.Tok == TOK_COMMA) {
+                /* (adr),y */
+                NextTok ();
+                Consume (TOK_Y, "`Y' expected");
+                A->AddrModeSet = AM65_DIR_IND_Y;
+            } else {
+                /* (adr) */
+                A->AddrModeSet = AM65_ABS_IND | AM65_ABS_IND_LONG | AM65_DIR_IND;
+            }
+        }
+
     } else if (CurTok.Tok == TOK_LBRACK) {
 
+        /* Never executed if BracketAsIndirect feature is enabled. */
         /* [dir] or [dir],y */
         NextTok ();
         A->Expr = Expression ();
@@ -113,56 +170,15 @@ void GetEA (EffAddr* A)
             A->AddrModeSet = AM65_DIR_IND_LONG | AM65_ABS_IND_LONG;
         }
 
-    } else if (CurTok.Tok == TOK_LPAREN) {
-
-        /* One of the indirect modes */
-        NextTok ();
-        A->Expr = Expression ();
-
-        if (CurTok.Tok == TOK_COMMA) {
-
-            /* (expr,X) or (rel,S),y */
-            NextTok ();
-            if (CurTok.Tok == TOK_X) {
-                /* (adr,x) */
-                NextTok ();
-                A->AddrModeSet = AM65_ABS_X_IND | AM65_DIR_X_IND;
-                ConsumeRParen ();
-            } else if (CurTok.Tok == TOK_S) {
-                /* (rel,s),y */
-                NextTok ();
-                A->AddrModeSet = AM65_STACK_REL_IND_Y;
-                ConsumeRParen ();
-                ConsumeComma ();
-                Consume (TOK_Y, "`Y' expected");
-            } else {
-                Error ("Syntax error");
-            }
-
-        } else {
-
-            /* (adr) or (adr),y */
-            ConsumeRParen ();
-            if (CurTok.Tok == TOK_COMMA) {
-                /* (adr),y */
-                NextTok ();
-                Consume (TOK_Y, "`Y' expected");
-                A->AddrModeSet = AM65_DIR_IND_Y;
-            } else {
-                /* (adr) */
-                A->AddrModeSet = AM65_ABS_IND | AM65_ABS_IND_LONG | AM65_DIR_IND;
-            }
-        }
-
     } else {
 
         /* Remaining stuff:
-         *
-         * adr
-         * adr,x
-         * adr,y
-         * adr,s
-         */
+        **
+        ** adr
+        ** adr,x
+        ** adr,y
+        ** adr,s
+        */
         A->Expr = Expression ();
 
         if (CurTok.Tok == TOK_COMMA) {

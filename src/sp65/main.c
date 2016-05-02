@@ -92,6 +92,7 @@ static void Usage (void)
             "\n"
             "Long options:\n"
             "  --convert-to fmt[,attrlist]\tConvert into target format\n"
+            "  --dump-palette\t\tDump palette as table\n"
             "  --help\t\t\tHelp (this text)\n"
             "  --list-conversions\t\tList all possible conversions\n"
             "  --pop\t\t\t\tRestore the original loaded image\n"
@@ -107,8 +108,8 @@ static void Usage (void)
 
 static void SetWorkBitmap (Bitmap* N)
 /* Delete an old working bitmap and set a new one. The new one may be NULL
- * to clear it.
- */
+** to clear it.
+*/
 {
     /* If we have a distinct work bitmap, delete it */
     if (C != 0 && C != B) {
@@ -123,8 +124,8 @@ static void SetWorkBitmap (Bitmap* N)
 
 static void SetOutputData (StrBuf* N)
 /* Delete the old output data and replace it by the given one. The new one
- * may be NULL to clear it.
- */
+** may be NULL to clear it.
+*/
 {
     /* Delete the old output data */
     if (D != 0) {
@@ -273,7 +274,7 @@ static void OptSlice (const char* Opt attribute ((unused)), const char* Arg)
 
 static void OptVerbose (const char* Opt attribute ((unused)),
                         const char* Arg attribute ((unused)))
-/* Increase versbosity */
+/* Increase verbosity */
 {
     ++Verbosity;
 }
@@ -395,6 +396,11 @@ int main (int argc, char* argv [])
 
         /* Next argument */
         ++I;
+    }
+
+    /* Do we have an input file? */
+    if (I == 1) {
+        Error ("No input file");
     }
 
     /* Cleanup data */

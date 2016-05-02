@@ -132,162 +132,168 @@ struct DotKeyword {
     const char* Key;                    /* MUST be first field */
     token_t     Tok;
 } DotKeywords [] = {
-    { ".A16",           TOK_A16         },
-    { ".A8",            TOK_A8          },
-    { ".ADDR",          TOK_ADDR        },
-    { ".ALIGN",         TOK_ALIGN       },
-    { ".AND",           TOK_BOOLAND     },
-    { ".ASCIIZ",        TOK_ASCIIZ      },
-    { ".ASSERT",        TOK_ASSERT      },
-    { ".AUTOIMPORT",    TOK_AUTOIMPORT  },
-    { ".BANK",          TOK_BANK        },
-    { ".BANKBYTE",      TOK_BANKBYTE    },
-    { ".BANKBYTES",     TOK_BANKBYTES   },
-    { ".BITAND",        TOK_AND         },
-    { ".BITNOT",        TOK_NOT         },
-    { ".BITOR",         TOK_OR          },
-    { ".BITXOR",        TOK_XOR         },
-    { ".BLANK",         TOK_BLANK       },
-    { ".BSS",           TOK_BSS         },
-    { ".BYT",           TOK_BYTE        },
-    { ".BYTE",          TOK_BYTE        },
-    { ".CASE",          TOK_CASE        },
-    { ".CHARMAP",       TOK_CHARMAP     },
-    { ".CODE",          TOK_CODE        },
-    { ".CONCAT",        TOK_CONCAT      },
-    { ".CONDES",        TOK_CONDES      },
-    { ".CONST",         TOK_CONST       },
-    { ".CONSTRUCTOR",   TOK_CONSTRUCTOR },
-    { ".CPU",           TOK_CPU         },
-    { ".DATA",          TOK_DATA        },
-    { ".DBG",           TOK_DBG         },
-    { ".DBYT",          TOK_DBYT        },
-    { ".DEBUGINFO",     TOK_DEBUGINFO   },
-    { ".DEF",           TOK_DEFINED     },
-    { ".DEFINE",        TOK_DEFINE      },
-    { ".DEFINED",       TOK_DEFINED     },
-    { ".DELMAC",        TOK_DELMAC      },
-    { ".DELMACRO",      TOK_DELMAC      },
-    { ".DESTRUCTOR",    TOK_DESTRUCTOR  },
-    { ".DWORD",         TOK_DWORD       },
-    { ".ELSE",          TOK_ELSE        },
-    { ".ELSEIF",        TOK_ELSEIF      },
-    { ".END",           TOK_END         },
-    { ".ENDENUM",       TOK_ENDENUM     },
-    { ".ENDIF",         TOK_ENDIF       },
-    { ".ENDMAC",        TOK_ENDMACRO    },
-    { ".ENDMACRO",      TOK_ENDMACRO    },
-    { ".ENDPROC",       TOK_ENDPROC     },
-    { ".ENDREP",        TOK_ENDREP      },
-    { ".ENDREPEAT",     TOK_ENDREP      },
-    { ".ENDSCOPE",      TOK_ENDSCOPE    },
-    { ".ENDSTRUCT",     TOK_ENDSTRUCT   },
-    { ".ENDUNION",      TOK_ENDUNION    },
-    { ".ENUM",          TOK_ENUM        },
-    { ".ERROR",         TOK_ERROR       },
-    { ".EXITMAC",       TOK_EXITMACRO   },
-    { ".EXITMACRO",     TOK_EXITMACRO   },
-    { ".EXPORT",        TOK_EXPORT      },
-    { ".EXPORTZP",      TOK_EXPORTZP    },
-    { ".FARADDR",       TOK_FARADDR     },
-    { ".FATAL",         TOK_FATAL       },
-    { ".FEATURE",       TOK_FEATURE     },
-    { ".FILEOPT",       TOK_FILEOPT     },
-    { ".FOPT",          TOK_FILEOPT     },
-    { ".FORCEIMPORT",   TOK_FORCEIMPORT },
-    { ".FORCEWORD",     TOK_FORCEWORD   },
-    { ".GLOBAL",        TOK_GLOBAL      },
-    { ".GLOBALZP",      TOK_GLOBALZP    },
-    { ".HIBYTE",        TOK_HIBYTE      },
-    { ".HIBYTES",       TOK_HIBYTES     },
-    { ".HIWORD",        TOK_HIWORD      },
-    { ".I16",           TOK_I16         },
-    { ".I8",            TOK_I8          },
-    { ".IDENT",         TOK_MAKEIDENT   },
-    { ".IF",            TOK_IF          },
-    { ".IFBLANK",       TOK_IFBLANK     },
-    { ".IFCONST",       TOK_IFCONST     },
-    { ".IFDEF",         TOK_IFDEF       },
-    { ".IFNBLANK",      TOK_IFNBLANK    },
-    { ".IFNCONST",      TOK_IFNCONST    },
-    { ".IFNDEF",        TOK_IFNDEF      },
-    { ".IFNREF",        TOK_IFNREF      },
-    { ".IFP02",         TOK_IFP02       },
-    { ".IFP816",        TOK_IFP816      },
-    { ".IFPC02",        TOK_IFPC02      },
-    { ".IFPSC02",       TOK_IFPSC02     },
-    { ".IFREF",         TOK_IFREF       },
-    { ".IMPORT",        TOK_IMPORT      },
-    { ".IMPORTZP",      TOK_IMPORTZP    },
-    { ".INCBIN",        TOK_INCBIN      },
-    { ".INCLUDE",       TOK_INCLUDE     },
-    { ".INTERRUPTOR",   TOK_INTERRUPTOR },
-    { ".LEFT",          TOK_LEFT        },
-    { ".LINECONT",      TOK_LINECONT    },
-    { ".LIST",          TOK_LIST        },
-    { ".LISTBYTES",     TOK_LISTBYTES   },
-    { ".LOBYTE",        TOK_LOBYTE      },
-    { ".LOBYTES",       TOK_LOBYTES     },
-    { ".LOCAL",         TOK_LOCAL       },
-    { ".LOCALCHAR",     TOK_LOCALCHAR   },
-    { ".LOWORD",        TOK_LOWORD      },
-    { ".MAC",           TOK_MACRO       },
-    { ".MACPACK",       TOK_MACPACK     },
-    { ".MACRO",         TOK_MACRO       },
-    { ".MATCH",         TOK_MATCH       },
-    { ".MAX",           TOK_MAX         },
-    { ".MID",           TOK_MID         },
-    { ".MIN",           TOK_MIN         },
-    { ".MOD",           TOK_MOD         },
-    { ".NOT",           TOK_BOOLNOT     },
-    { ".NULL",          TOK_NULL        },
-    { ".OR",            TOK_BOOLOR      },
-    { ".ORG",           TOK_ORG         },
-    { ".OUT",           TOK_OUT         },
-    { ".P02",           TOK_P02         },
-    { ".P816",          TOK_P816        },
-    { ".PAGELEN",       TOK_PAGELENGTH  },
-    { ".PAGELENGTH",    TOK_PAGELENGTH  },
-    { ".PARAMCOUNT",    TOK_PARAMCOUNT  },
-    { ".PC02",          TOK_PC02        },
-    { ".POPCPU",        TOK_POPCPU      },
-    { ".POPSEG",        TOK_POPSEG      },
-    { ".PROC",          TOK_PROC        },
-    { ".PSC02",         TOK_PSC02       },
-    { ".PUSHCPU",       TOK_PUSHCPU     },
-    { ".PUSHSEG",       TOK_PUSHSEG     },
-    { ".REF",           TOK_REFERENCED  },
-    { ".REFERENCED",    TOK_REFERENCED  },
-    { ".RELOC",         TOK_RELOC       },
-    { ".REPEAT",        TOK_REPEAT      },
-    { ".RES",           TOK_RES         },
-    { ".RIGHT",         TOK_RIGHT       },
-    { ".RODATA",        TOK_RODATA      },
-    { ".SCOPE",         TOK_SCOPE       },
-    { ".SEGMENT",       TOK_SEGMENT     },
-    { ".SET",           TOK_SET         },
-    { ".SETCPU",        TOK_SETCPU      },
-    { ".SHL",           TOK_SHL         },
-    { ".SHR",           TOK_SHR         },
-    { ".SIZEOF",        TOK_SIZEOF      },
-    { ".SMART",         TOK_SMART       },
-    { ".SPRINTF",       TOK_SPRINTF     },
-    { ".STRAT",         TOK_STRAT       },
-    { ".STRING",        TOK_STRING      },
-    { ".STRLEN",        TOK_STRLEN      },
-    { ".STRUCT",        TOK_STRUCT      },
-    { ".TAG",           TOK_TAG         },
-    { ".TCOUNT",        TOK_TCOUNT      },
-    { ".TIME",          TOK_TIME        },
-    { ".UNDEF",         TOK_UNDEF       },
-    { ".UNDEFINE",      TOK_UNDEF       },
-    { ".UNION",         TOK_UNION       },
-    { ".VERSION",       TOK_VERSION     },
-    { ".WARNING",       TOK_WARNING     },
-    { ".WORD",          TOK_WORD        },
-    { ".XMATCH",        TOK_XMATCH      },
-    { ".XOR",           TOK_BOOLXOR     },
-    { ".ZEROPAGE",      TOK_ZEROPAGE    },
+    { ".A16",           TOK_A16                 },
+    { ".A8",            TOK_A8                  },
+    { ".ADDR",          TOK_ADDR                },
+    { ".ADDRSIZE",      TOK_ADDRSIZE            },
+    { ".ALIGN",         TOK_ALIGN               },
+    { ".AND",           TOK_BOOLAND             },
+    { ".ASCIIZ",        TOK_ASCIIZ              },
+    { ".ASIZE",         TOK_ASIZE               },
+    { ".ASSERT",        TOK_ASSERT              },
+    { ".AUTOIMPORT",    TOK_AUTOIMPORT          },
+    { ".BANK",          TOK_BANK                },
+    { ".BANKBYTE",      TOK_BANKBYTE            },
+    { ".BANKBYTES",     TOK_BANKBYTES           },
+    { ".BITAND",        TOK_AND                 },
+    { ".BITNOT",        TOK_NOT                 },
+    { ".BITOR",         TOK_OR                  },
+    { ".BITXOR",        TOK_XOR                 },
+    { ".BLANK",         TOK_BLANK               },
+    { ".BSS",           TOK_BSS                 },
+    { ".BYT",           TOK_BYTE                },
+    { ".BYTE",          TOK_BYTE                },
+    { ".CASE",          TOK_CASE                },
+    { ".CHARMAP",       TOK_CHARMAP             },
+    { ".CODE",          TOK_CODE                },
+    { ".CONCAT",        TOK_CONCAT              },
+    { ".CONDES",        TOK_CONDES              },
+    { ".CONST",         TOK_CONST               },
+    { ".CONSTRUCTOR",   TOK_CONSTRUCTOR         },
+    { ".CPU",           TOK_CPU                 },
+    { ".DATA",          TOK_DATA                },
+    { ".DBG",           TOK_DBG                 },
+    { ".DBYT",          TOK_DBYT                },
+    { ".DEBUGINFO",     TOK_DEBUGINFO           },
+    { ".DEF",           TOK_DEFINED             },
+    { ".DEFINE",        TOK_DEFINE              },
+    { ".DEFINED",       TOK_DEFINED             },
+    { ".DEFINEDMACRO",  TOK_DEFINEDMACRO        },
+    { ".DELMAC",        TOK_DELMAC              },
+    { ".DELMACRO",      TOK_DELMAC              },
+    { ".DESTRUCTOR",    TOK_DESTRUCTOR          },
+    { ".DWORD",         TOK_DWORD               },
+    { ".ELSE",          TOK_ELSE                },
+    { ".ELSEIF",        TOK_ELSEIF              },
+    { ".END",           TOK_END                 },
+    { ".ENDENUM",       TOK_ENDENUM             },
+    { ".ENDIF",         TOK_ENDIF               },
+    { ".ENDMAC",        TOK_ENDMACRO            },
+    { ".ENDMACRO",      TOK_ENDMACRO            },
+    { ".ENDPROC",       TOK_ENDPROC             },
+    { ".ENDREP",        TOK_ENDREP              },
+    { ".ENDREPEAT",     TOK_ENDREP              },
+    { ".ENDSCOPE",      TOK_ENDSCOPE            },
+    { ".ENDSTRUCT",     TOK_ENDSTRUCT           },
+    { ".ENDUNION",      TOK_ENDUNION            },
+    { ".ENUM",          TOK_ENUM                },
+    { ".ERROR",         TOK_ERROR               },
+    { ".EXITMAC",       TOK_EXITMACRO           },
+    { ".EXITMACRO",     TOK_EXITMACRO           },
+    { ".EXPORT",        TOK_EXPORT              },
+    { ".EXPORTZP",      TOK_EXPORTZP            },
+    { ".FARADDR",       TOK_FARADDR             },
+    { ".FATAL",         TOK_FATAL               },
+    { ".FEATURE",       TOK_FEATURE             },
+    { ".FILEOPT",       TOK_FILEOPT             },
+    { ".FOPT",          TOK_FILEOPT             },
+    { ".FORCEIMPORT",   TOK_FORCEIMPORT         },
+    { ".FORCEWORD",     TOK_FORCEWORD           },
+    { ".GLOBAL",        TOK_GLOBAL              },
+    { ".GLOBALZP",      TOK_GLOBALZP            },
+    { ".HIBYTE",        TOK_HIBYTE              },
+    { ".HIBYTES",       TOK_HIBYTES             },
+    { ".HIWORD",        TOK_HIWORD              },
+    { ".I16",           TOK_I16                 },
+    { ".I8",            TOK_I8                  },
+    { ".IDENT",         TOK_MAKEIDENT           },
+    { ".IF",            TOK_IF                  },
+    { ".IFBLANK",       TOK_IFBLANK             },
+    { ".IFCONST",       TOK_IFCONST             },
+    { ".IFDEF",         TOK_IFDEF               },
+    { ".IFNBLANK",      TOK_IFNBLANK            },
+    { ".IFNCONST",      TOK_IFNCONST            },
+    { ".IFNDEF",        TOK_IFNDEF              },
+    { ".IFNREF",        TOK_IFNREF              },
+    { ".IFP02",         TOK_IFP02               },
+    { ".IFP816",        TOK_IFP816              },
+    { ".IFPC02",        TOK_IFPC02              },
+    { ".IFPSC02",       TOK_IFPSC02             },
+    { ".IFREF",         TOK_IFREF               },
+    { ".IMPORT",        TOK_IMPORT              },
+    { ".IMPORTZP",      TOK_IMPORTZP            },
+    { ".INCBIN",        TOK_INCBIN              },
+    { ".INCLUDE",       TOK_INCLUDE             },
+    { ".INTERRUPTOR",   TOK_INTERRUPTOR         },
+    { ".ISIZE",         TOK_ISIZE               },
+    { ".ISMNEM",        TOK_ISMNEMONIC          },
+    { ".ISMNEMONIC",    TOK_ISMNEMONIC          },
+    { ".LEFT",          TOK_LEFT                },
+    { ".LINECONT",      TOK_LINECONT            },
+    { ".LIST",          TOK_LIST                },
+    { ".LISTBYTES",     TOK_LISTBYTES           },
+    { ".LOBYTE",        TOK_LOBYTE              },
+    { ".LOBYTES",       TOK_LOBYTES             },
+    { ".LOCAL",         TOK_LOCAL               },
+    { ".LOCALCHAR",     TOK_LOCALCHAR           },
+    { ".LOWORD",        TOK_LOWORD              },
+    { ".MAC",           TOK_MACRO               },
+    { ".MACPACK",       TOK_MACPACK             },
+    { ".MACRO",         TOK_MACRO               },
+    { ".MATCH",         TOK_MATCH               },
+    { ".MAX",           TOK_MAX                 },
+    { ".MID",           TOK_MID                 },
+    { ".MIN",           TOK_MIN                 },
+    { ".MOD",           TOK_MOD                 },
+    { ".NOT",           TOK_BOOLNOT             },
+    { ".NULL",          TOK_NULL                },
+    { ".OR",            TOK_BOOLOR              },
+    { ".ORG",           TOK_ORG                 },
+    { ".OUT",           TOK_OUT                 },
+    { ".P02",           TOK_P02                 },
+    { ".P816",          TOK_P816                },
+    { ".PAGELEN",       TOK_PAGELENGTH          },
+    { ".PAGELENGTH",    TOK_PAGELENGTH          },
+    { ".PARAMCOUNT",    TOK_PARAMCOUNT          },
+    { ".PC02",          TOK_PC02                },
+    { ".POPCPU",        TOK_POPCPU              },
+    { ".POPSEG",        TOK_POPSEG              },
+    { ".PROC",          TOK_PROC                },
+    { ".PSC02",         TOK_PSC02               },
+    { ".PUSHCPU",       TOK_PUSHCPU             },
+    { ".PUSHSEG",       TOK_PUSHSEG             },
+    { ".REF",           TOK_REFERENCED          },
+    { ".REFERENCED",    TOK_REFERENCED          },
+    { ".RELOC",         TOK_RELOC               },
+    { ".REPEAT",        TOK_REPEAT              },
+    { ".RES",           TOK_RES                 },
+    { ".RIGHT",         TOK_RIGHT               },
+    { ".RODATA",        TOK_RODATA              },
+    { ".SCOPE",         TOK_SCOPE               },
+    { ".SEGMENT",       TOK_SEGMENT             },
+    { ".SET",           TOK_SET                 },
+    { ".SETCPU",        TOK_SETCPU              },
+    { ".SHL",           TOK_SHL                 },
+    { ".SHR",           TOK_SHR                 },
+    { ".SIZEOF",        TOK_SIZEOF              },
+    { ".SMART",         TOK_SMART               },
+    { ".SPRINTF",       TOK_SPRINTF             },
+    { ".STRAT",         TOK_STRAT               },
+    { ".STRING",        TOK_STRING              },
+    { ".STRLEN",        TOK_STRLEN              },
+    { ".STRUCT",        TOK_STRUCT              },
+    { ".TAG",           TOK_TAG                 },
+    { ".TCOUNT",        TOK_TCOUNT              },
+    { ".TIME",          TOK_TIME                },
+    { ".UNDEF",         TOK_UNDEF               },
+    { ".UNDEFINE",      TOK_UNDEF               },
+    { ".UNION",         TOK_UNION               },
+    { ".VERSION",       TOK_VERSION             },
+    { ".WARNING",       TOK_WARNING             },
+    { ".WORD",          TOK_WORD                },
+    { ".XMATCH",        TOK_XMATCH              },
+    { ".XOR",           TOK_BOOLXOR             },
+    { ".ZEROPAGE",      TOK_ZEROPAGE            },
 };
 
 
@@ -313,8 +319,8 @@ static void UseCharSource (CharSource* S)
     S->Func->NextChar (S);
 
     /* Setup the next token so it will be skipped on the next call to
-     * NextRawTok().
-     */
+    ** NextRawTok().
+    */
     CurTok.Tok = TOK_SEP;
 }
 
@@ -378,8 +384,8 @@ static void IFNextChar (CharSource* S)
                 }
 
                 /* No more data - add an empty line to the listing. This
-                 * is a small hack needed to keep the PC output in sync.
-                 */
+                ** is a small hack needed to keep the PC output in sync.
+                */
                 NewListingLine (&EmptyStrBuf, S->V.File.Pos.Name, FCount);
                 C = EOF;
                 return;
@@ -401,9 +407,9 @@ static void IFNextChar (CharSource* S)
 
 
         /* If we come here, we have a new input line. To avoid problems
-         * with strange line terminators, remove all whitespace from the
-         * end of the line, the add a single newline.
-         */
+        ** with strange line terminators, remove all whitespace from the
+        ** end of the line, the add a single newline.
+        */
         Len = SB_GetLen (&S->V.File.Line);
         while (Len > 0 && IsSpace (SB_AtUnchecked (&S->V.File.Line, Len-1))) {
             --Len;
@@ -435,11 +441,11 @@ void IFDone (CharSource* S)
 /* Close the current input file */
 {
     /* We're at the end of an include file. Check if we have any
-     * open .IFs, or any open token lists in this file. This
-     * enforcement is artificial, using conditionals that start
-     * in one file and end in another are uncommon, and don't
-     * allowing these things will help finding errors.
-     */
+    ** open .IFs, or any open token lists in this file. This
+    ** enforcement is artificial, using conditionals that start
+    ** in one file and end in another are uncommon, and don't
+    ** allowing these things will help finding errors.
+    */
     CheckOpenIfs ();
 
     /* If we've added search paths for this file, remove them */
@@ -454,8 +460,8 @@ void IFDone (CharSource* S)
     SB_Done (&S->V.File.Line);
 
     /* Close the input file and decrement the file count. We will ignore
-     * errors here, since we were just reading from the file.
-     */
+    ** errors here, since we were just reading from the file.
+    */
     (void) fclose (S->V.File.F);
     --FCount;
 }
@@ -473,8 +479,8 @@ static const CharSourceFunctions IFFunc = {
 
 int NewInputFile (const char* Name)
 /* Open a new input file. Returns true if the file could be successfully opened
- * and false otherwise.
- */
+** and false otherwise.
+*/
 {
     int         RetCode = 0;            /* Return code. Assume an error. */
     char*       PathName = 0;
@@ -487,8 +493,8 @@ int NewInputFile (const char* Name)
 
 
     /* If this is the main file, just try to open it. If it's an include file,
-     * search for it using the include path list.
-     */
+    ** search for it using the include path list.
+    */
     if (FCount == 0) {
         /* Main file */
         F = fopen (Name, "r");
@@ -497,8 +503,8 @@ int NewInputFile (const char* Name)
         }
     } else {
         /* We are on include level. Search for the file in the include
-         * directories.
-         */
+        ** directories.
+        */
         PathName = SearchFile (IncSearchPath, Name);
         if (PathName == 0 || (F = fopen (PathName, "r")) == 0) {
             /* Not found or cannot open, print an error and bail out */
@@ -510,14 +516,14 @@ int NewInputFile (const char* Name)
         Name = PathName;
     }
 
-    /* Stat the file and remember the values. There a race condition here,
-     * since we cannot use fileno() (non standard identifier in standard
-     * header file), and therefore not fstat. When using stat with the
-     * file name, there's a risk that the file was deleted and recreated
-     * while it was open. Since mtime and size are only used to check
-     * if a file has changed in the debugger, we will ignore this problem
-     * here.
-     */
+    /* Stat the file and remember the values. There's a race condition here,
+    ** since we cannot use fileno() (non-standard identifier in standard
+    ** header file), and therefore not fstat. When using stat with the
+    ** file name, there's a risk that the file was deleted and recreated
+    ** while it was open. Since mtime and size are only used to check
+    ** if a file has changed in the debugger, we will ignore this problem
+    ** here.
+    */
     if (FileStat (Name, &Buf) != 0) {
         Fatal ("Cannot stat input file `%s': %s", Name, strerror (errno));
     }
@@ -704,8 +710,8 @@ static int CmpDotKeyword (const void* K1, const void* K2)
 
 static token_t FindDotKeyword (void)
 /* Find the dot keyword in SVal. Return the corresponding token if found,
- * return TOK_NONE if not found.
- */
+** return TOK_NONE if not found.
+*/
 {
     struct DotKeyword K;
     struct DotKeyword* R;
@@ -723,7 +729,24 @@ static token_t FindDotKeyword (void)
     R = bsearch (&K, DotKeywords, sizeof (DotKeywords) / sizeof (DotKeywords [0]),
                  sizeof (DotKeywords [0]), CmpDotKeyword);
     if (R != 0) {
+
+        /* By default, disable any somewhat experiemental DotKeyword. */
+
+        switch (R->Tok) {
+
+            case TOK_ADDRSIZE:
+                /* Disallow .ADDRSIZE function by default */
+                if (AddrSize == 0) {
+                    return TOK_NONE;
+                }
+                break;
+
+            default:
+                break;
+        }
+
         return R->Tok;
+
     } else {
         return TOK_NONE;
     }
@@ -733,10 +756,10 @@ static token_t FindDotKeyword (void)
 
 static void ReadIdent (void)
 /* Read an identifier from the current input position into Ident. Filling SVal
- * starts at the current position with the next character in C. It is assumed
- * that any characters already filled in are ok, and the character in C is
- * checked.
- */
+** starts at the current position with the next character in C. It is assumed
+** that any characters already filled in are ok, and the character in C is
+** checked.
+*/
 {
     /* Read the identifier */
     do {
@@ -787,8 +810,8 @@ static void ReadStringConst (int StringTerm)
 
 static int Sweet16Reg (const StrBuf* Id)
 /* Check if the given identifier is a sweet16 register. Return -1 if this is
- * not the case, return the register number otherwise.
- */
+** not the case, return the register number otherwise.
+*/
 {
     unsigned RegNum;
     char Check;
@@ -960,9 +983,9 @@ Again:
             }
             if (IsXDigit (C)) {
                 /* Buf is big enough to allow any decimal and hex number to
-                 * overflow, so ignore excess digits here, they will be detected
-                 * when we convert the value.
-                 */
+                ** overflow, so ignore excess digits here, they will be detected
+                ** when we convert the value.
+                */
                 if (Digits < sizeof (Buf)) {
                     Buf[Digits++] = C;
                 }
@@ -991,7 +1014,7 @@ Again:
                 break;
             }
             DVal = DigitVal (Buf[I]);
-            if (DVal > Base) {
+            if (DVal >= Base) {
                 Error ("Invalid digits in number");
                 CurTok.IVal = 0;
                 break;
@@ -1034,8 +1057,8 @@ Again:
                 }
 
                 /* An identifier with a dot. Check if it's a define style
-                 * macro.
-                 */
+                ** macro.
+                */
                 if ((M = FindDefine (&CurTok.SVal)) != 0) {
                     /* This is a define style macro - expand it */
                     MacExpandStart (M);
@@ -1051,8 +1074,8 @@ Again:
     }
 
     /* Indirect op for sweet16 cpu. Must check this before checking for local
-     * symbols, because these may also use the '@' symbol.
-     */
+    ** symbols, because these may also use the '@' symbol.
+    */
     if (CPU == CPU_SWEET16 && C == '@') {
         NextChar ();
         CurTok.Tok = TOK_AT;
@@ -1084,8 +1107,8 @@ Again:
         ReadIdent ();
 
         /* Check for special names. Bail out if we have identified the type of
-         * the token. Go on if the token is an identifier.
-         */
+        ** the token. Go on if the token is an identifier.
+        */
         if (SB_GetLen (&CurTok.SVal) == 1) {
             switch (toupper (SB_AtUnchecked (&CurTok.SVal, 0))) {
 
@@ -1357,9 +1380,9 @@ CharAgain:
 
         case '\'':
             /* Hack: If we allow ' as terminating character for strings, read
-             * the following stuff as a string, and check for a one character
-             * string later.
-             */
+            ** the following stuff as a string, and check for a one character
+            ** string later.
+            */
             if (LooseStringTerm) {
                 ReadStringConst ('\'');
                 if (SB_GetLen (&CurTok.SVal) == 1) {
@@ -1397,11 +1420,14 @@ CharAgain:
             /* Line continuation? */
             if (LineCont) {
                 NextChar ();
+                /* Next char should be a LF, if not, will result in an error later */
                 if (C == '\n') {
-                    /* Handle as white space */
+                    /* Ignore the '\n' */
                     NextChar ();
-                    C = ' ';
                     goto Again;
+                } else {
+                    /* Make it clear what the problem is: */
+                    Error ("EOL expected.");
                 }
             }
             break;
@@ -1424,8 +1450,8 @@ CharAgain:
     }
 
     /* If we go here, we could not identify the current character. Skip it
-     * and try again.
-     */
+    ** and try again.
+    */
     Error ("Invalid input character: 0x%02X", C & 0xFF);
     NextChar ();
     goto Again;
@@ -1435,10 +1461,10 @@ CharAgain:
 
 int GetSubKey (const char** Keys, unsigned Count)
 /* Search for a subkey in a table of keywords. The current token must be an
- * identifier and all keys must be in upper case. The identifier will be
- * uppercased in the process. The function returns the index of the keyword,
- * or -1 if the keyword was not found.
- */
+** identifier and all keys must be in upper case. The identifier will be
+** uppercased in the process. The function returns the index of the keyword,
+** or -1 if the keyword was not found.
+*/
 {
     unsigned I;
 
@@ -1466,9 +1492,9 @@ int GetSubKey (const char** Keys, unsigned Count)
 
 unsigned char ParseAddrSize (void)
 /* Check if the next token is a keyword that denotes an address size specifier.
- * If so, return the corresponding address size constant, otherwise output an
- * error message and return ADDR_SIZE_DEFAULT.
- */
+** If so, return the corresponding address size constant, otherwise output an
+** error message and return ADDR_SIZE_DEFAULT.
+*/
 {
     unsigned char AddrSize;
 

@@ -32,6 +32,7 @@ FETCH           := $2A2         ; Fetch subroutine in RAM
 FETVEC          := $2AA         ; Vector patch location for FETCH
 STASH           := $2AF         ; Stash routine in RAM
 STAVEC          := $2B9         ; Vector patch location for STASH
+IRQInd          := $2FD         ; JMP $0000 -- used as indirect IRQ vector
 PALFLAG         := $A03         ; $FF=PAL, $00=NTSC
 INIT_STATUS     := $A04         ; Flags: Reset/Restore initiation status
 FKEY_LEN        := $1000        ; Function key lengths
@@ -203,6 +204,8 @@ MMU_CFG_RAM0    := %00111111    ; Bank 0 full RAM
 MMU_CFG_RAM1    := %01111111    ; Bank 1 full RAM
 MMU_CFG_RAM2    := %10111111    ; Bank 2 full RAM
 MMU_CFG_RAM3    := %11111111    ; Bank 3 full RAM
+MMU_CFG_IFROM   := %01010111    ; Bank 1 with Internal Function RAM/ROM
+MMU_CFG_EFROM   := %01101011    ; Bank 1 with External Function RAM/ROM
 
 ; ---------------------------------------------------------------------------
 ; Super CPU

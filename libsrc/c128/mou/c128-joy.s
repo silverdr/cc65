@@ -2,7 +2,8 @@
 ; Driver for a "joystick mouse".
 ;
 ; 2009-09-26, Ullrich von Bassewitz
-; 2014-03-17, Greg King
+; 2014-04-26, Christian Groessler
+; 2014-05-01, Greg King
 ;
 
         .include        "zeropage.inc"
@@ -10,11 +11,13 @@
         .include        "c128.inc"
 
         .macpack        generic
+        .macpack        module
+
 
 ; ------------------------------------------------------------------------
 ; Header. Includes jump table
 
-.segment        "JUMPTABLE"
+        module_header   _c128_joy_mou
 
 HEADER:
 
@@ -25,7 +28,7 @@ HEADER:
 
 ; Library reference
 
-        .addr   $0000
+libref: .addr   $0000
 
 ; Jump table
 
@@ -88,9 +91,13 @@ Buttons:        .res    1               ; Button mask
 
 INIT_save:      .res    1
 
-; Temporary value used in the int handler
+; Keyboard buffer fill level at start of interrupt
 
-Temp:           .res    1
+old_key_count:  .res    1
+
+; original IRQ vector
+
+old_irq:        .res    2
 
 .rodata
 
@@ -144,6 +151,48 @@ INSTALL:
         lda     YPos
         ldx     YPos+1
         jsr     CMOVEY
+
+; Initialize our IRQ magic
+
+        ; remember ROM IRQ continuation address
+        lda     IRQInd+2
+        sta     old_irq+1
+        lda     IRQInd+1
+        sta     old_irq
+
+        lda     libref
+        sta     ptr3
+        lda     libref+1
+        sta     ptr3+1
+
+        ; set ROM IRQ continuation address to point to the provided routine
+        ldy     #2
+        lda     (ptr3),y
+        sta     IRQInd+1
+        iny
+        lda     (ptr3),y
+        sta     IRQInd+2
+
+        ; set address of our IRQ callback routine
+        ; since it's called via "rts" we have to use "address-1"
+        iny
+        lda     #<(callback-1)
+        sta     (ptr3),y
+        iny
+        lda     #>(callback-1)
+        sta     (ptr3),y
+        iny
+
+        ; set ROM entry point vector
+        ; since it's called via "rts" we have to decrement it by one
+        lda     old_irq
+        sec
+        sbc     #1
+        sta     (ptr3),y
+        iny
+        lda     old_irq+1
+        sbc     #0
+        sta     (ptr3),y
         cli
 
 ; Done, return zero (= MOUSE_ERR_OK)
@@ -157,6 +206,13 @@ INSTALL:
 ; No return code required (the driver is removed from memory on return).
 
 UNINSTALL:
+        lda     old_irq
+        sei
+        sta     IRQInd+1
+        lda     old_irq+1
+        sta     IRQInd+2
+        ;cli                            ; This will be done at end of HIDE
+
         jsr     HIDE                    ; Hide cursor on exit
         lda     INIT_save
         sta     INIT_STATUS
@@ -258,6 +314,7 @@ MOVE:   sei                             ; No interrupts
 BUTTONS:
         lda     Buttons
         ldx     #$00
+        and     #MOUSE_BTN_LEFT         ; Left button -- same as JOY::FIRE
         rts
 
 ;----------------------------------------------------------------------------
@@ -296,7 +353,7 @@ INFO:   jsr     POS
 
 ; Fill in the button state
 
-        lda     Buttons
+        jsr     BUTTONS
         ldy     #MOUSE_INFO::BUTTONS
         sta     (ptr1),y
 
@@ -308,7 +365,7 @@ INFO:   jsr     POS
 ; Must return an error code in a/x.
 ;
 
-IOCTL:  lda     #<MOUSE_ERR_INV_IOCTL     ; We don't support ioclts for now
+IOCTL:  lda     #<MOUSE_ERR_INV_IOCTL     ; We don't support ioctls for now
         ldx     #>MOUSE_ERR_INV_IOCTL
         rts
 
@@ -320,24 +377,17 @@ IOCTL:  lda     #<MOUSE_ERR_INV_IOCTL     ; We don't support ioclts for now
 ;
 
 IRQ:    jsr     CPREP
+        lda     KEY_COUNT
+        sta     old_key_count
         lda     #$7F
         sta     CIA1_PRA
         lda     CIA1_PRB                ; Read joystick #0
         and     #$1F
         eor     #$1F                    ; Make all bits active high
-        sta     Temp
-
-; Check for a pressed button and place the result into Buttons
-
-        ldx     #$00                    ; Assume no button pressed
-        and     #JOY::FIRE              ; Check fire button
-        beq     @L0                     ; Jump if not pressed
-        ldx     #MOUSE_BTN_LEFT         ; Left (only) button is pressed
-@L0:    stx     Buttons
+        sta     Buttons
 
 ; Check left/right
 
-        lda     Temp                    ; Read joystick #0
         and     #(JOY::LEFT | JOY::RIGHT)
         beq     @SkipX                  ;
 
@@ -385,7 +435,7 @@ IRQ:    jsr     CPREP
 
 ; Calculate the Y movement vector
 
-@SkipX: lda     Temp                    ; Read joystick #0
+@SkipX: lda     Buttons                 ; Read joystick #0
         and     #(JOY::UP | JOY::DOWN)  ; Check up/down
         beq     @SkipY                  ;
 
@@ -436,3 +486,6 @@ IRQ:    jsr     CPREP
 @SkipY: jsr     CDRAW
         clc                             ; Interrupt not "handled"
         rts
+
+.define OLD_BUTTONS Buttons             ; tells callback.inc where the old port status is stored
+.include "callback.inc"

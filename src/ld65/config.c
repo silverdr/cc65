@@ -131,9 +131,9 @@ typedef enum {
 } CfgSymType;
 
 /* Symbol structure. It is used for o65 imports and exports, but also for
- * symbols from the SYMBOLS sections (symbols defined in the config file or
- * forced imports).
- */
+** symbols from the SYMBOLS sections (symbols defined in the config file or
+** forced imports).
+*/
 typedef struct CfgSymbol CfgSymbol;
 struct CfgSymbol {
     CfgSymType  Type;           /* Type of symbol */
@@ -268,9 +268,9 @@ static void MemoryInsert (MemoryArea* M, SegDesc* S)
 
 static CfgSymbol* NewCfgSymbol (CfgSymType Type, unsigned Name)
 /* Create a new CfgSymbol structure with the given type and name. The
- * current config file position is recorded in the returned struct. The
- * created struct is inserted into the CfgSymbols collection and returned.
- */
+** current config file position is recorded in the returned struct. The
+** created struct is inserted into the CfgSymbols collection and returned.
+*/
 {
     /* Allocate memory */
     CfgSymbol* Sym = xmalloc (sizeof (CfgSymbol));
@@ -385,8 +385,8 @@ static void FreeSegDesc (SegDesc* S)
 
 static void FlagAttr (unsigned* Flags, unsigned Mask, const char* Name)
 /* Check if the item is already defined. Print an error if so. If not, set
- * the marker that we have a definition now.
- */
+** the marker that we have a definition now.
+*/
 {
     if (*Flags & Mask) {
         CfgError (&CfgErrorPos, "%s is already defined", Name);
@@ -522,8 +522,8 @@ static void ParseMemory (void)
         AttrCheck (M->Attr, MA_SIZE, "SIZE");
 
         /* If we don't have a file name for output given, use the default
-         * file name.
-         */
+        ** file name.
+        */
         if ((M->Attr & MA_FILE) == 0) {
             FileInsert (GetFile (GetStringId (OutputName)), M);
             OutputNameUsed = 1;
@@ -781,8 +781,8 @@ static void ParseSegments (void)
         }
 
         /* An attribute of ALIGN_LOAD doesn't make sense if there are no
-         * separate run and load memory areas.
-         */
+        ** separate run and load memory areas.
+        */
         if ((S->Flags & SF_ALIGN_LOAD) != 0 && (S->Load == S->Run)) {
             CfgWarning (&CfgErrorPos,
                         "ALIGN_LOAD attribute specified, but no separate "
@@ -792,8 +792,8 @@ static void ParseSegments (void)
         }
 
         /* If the segment is marked as BSS style, it may not have separate
-         * load and run memory areas, because it's is never written to disk.
-         */
+        ** load and run memory areas, because it's is never written to disk.
+        */
         if ((S->Flags & SF_BSS) != 0 && (S->Load != S->Run)) {
             CfgWarning (&CfgErrorPos,
                         "Segment with type `bss' has both LOAD and RUN "
@@ -930,8 +930,8 @@ static void ParseO65 (void)
                 /* Cannot use this attribute twice */
                 FlagAttr (&AttrFlags, atOS, "OS");
                 /* Get the operating system. It may be specified as name or
-                 * as a number in the range 1..255.
-                 */
+                ** as a number in the range 1..255.
+                */
                 if (CfgTok == CFGTOK_INTCON) {
                     CfgRangeCheck (O65OS_MIN, O65OS_MAX);
                     OS = (unsigned) CfgIVal;
@@ -1266,8 +1266,8 @@ static void ParseStartAddress (void)
     AttrCheck (AttrFlags, atDefault, "DEFAULT");
 
     /* If no start address was given on the command line, use the one given
-     * here
-     */
+    ** here
+    */
     if (!HaveStartAddr) {
         StartAddr = DefStartAddr;
     }
@@ -1559,8 +1559,8 @@ void CfgRead (void)
     O65FmtDesc = NewO65Desc ();
 
     /* If we have a config name given, open the file, otherwise we will read
-     * from a buffer.
-     */
+    ** from a buffer.
+    */
     CfgOpenInput ();
 
     /* Parse the file */
@@ -1591,14 +1591,14 @@ static void ProcessSegments (void)
         SegDesc* S = CollAtUnchecked (&SegDescList, I);
 
         /* Search for the actual segment in the input files. The function may
-         * return NULL (no such segment), this is checked later.
-         */
+        ** return NULL (no such segment), this is checked later.
+        */
         S->Seg = SegFind (S->Name);
 
         /* If the segment is marked as BSS style, and if the segment exists
-         * in any of the object file, check that there's no initialized data
-         * in the segment.
-         */
+        ** in any of the object file, check that there's no initialized data
+        ** in the segment.
+        */
         if ((S->Flags & SF_BSS) != 0 && S->Seg != 0 && !IsBSSType (S->Seg)) {
             CfgWarning (GetSourcePos (S->LI),
                         "Segment `%s' with type `bss' contains initialized data",
@@ -1606,10 +1606,10 @@ static void ProcessSegments (void)
         }
 
         /* If this segment does exist in any of the object files, insert the
-         * segment into the load/run memory areas. Otherwise print a warning
-         * and discard it, because the segment pointer in the descriptor is
-         * invalid.
-         */
+        ** segment into the load/run memory areas. Otherwise print a warning
+        ** and discard it, because the segment pointer in the descriptor is
+        ** invalid.
+        */
         if (S->Seg != 0) {
 
             /* Insert the segment into the memory area list */
@@ -1669,9 +1669,9 @@ static void ProcessSymbols (void)
                 }
 
                 /* Check if we have this symbol defined already. The entry
-                 * routine will check this also, but we get a more verbose
-                 * error message when checking it here.
-                 */
+                ** routine will check this also, but we get a more verbose
+                ** error message when checking it here.
+                */
                 if (O65GetExport (O65FmtDesc, Sym->Name) != 0) {
                     CfgError (
                         GetSourcePos (Sym->LI),
@@ -1695,9 +1695,9 @@ static void ProcessSymbols (void)
                 }
 
                 /* Check if we have this symbol defined already. The entry
-                 * routine will check this also, but we get a more verbose
-                 * error message when checking it here.
-                 */
+                ** routine will check this also, but we get a more verbose
+                ** error message when checking it here.
+                */
                 if (O65GetImport (O65FmtDesc, Sym->Name) != 0) {
                     CfgError (
                         GetSourcePos (Sym->LI),
@@ -1769,31 +1769,30 @@ static void CreateLoadDefines (SegDesc* S, unsigned long SegAddr)
 
 
 unsigned CfgProcess (void)
-/* Process the config file after reading in object files and libraries. This
- * includes postprocessing of the config file data but also assigning segments
- * and defining segment/memory area related symbols. The function will return
- * the number of memory area overflows (so zero means anything went ok).
- * In case of overflows, a short mapfile can be generated later, to ease the
- * task of rearranging segments for the user.
- */
+/* Process the config file, after reading in object files and libraries. This
+** includes postprocessing of the config file data; but also assigning segments,
+** and defining segment/memory-area related symbols. The function will return
+** the number of memory area overflows (so, zero means everything went OK).
+** In case of overflows, a short mapfile can be generated later, to ease the
+** user's task of re-arranging segments.
+*/
 {
     unsigned Overflows = 0;
     unsigned I;
 
     /* Postprocess symbols. We must do that first, since weak symbols are
-     * defined here, which may be needed later.
-     */
+    ** defined here, which may be needed later.
+    */
     ProcessSymbols ();
 
     /* Postprocess segments */
     ProcessSegments ();
 
-    /* Walk through each of the memory sections. Add up the sizes and check
-     * for an overflow of the section. Assign the start addresses of the
-     * segments while doing this.
-     */
+    /* Walk through each of the memory sections. Add up the sizes; and, check
+    ** for an overflow of the section. Assign the start addresses of the
+    ** segments while doing that.
+    */
     for (I = 0; I < CollCount (&MemoryAreas); ++I) {
-
         unsigned J;
         unsigned long Addr;
 
@@ -1806,9 +1805,9 @@ unsigned CfgProcess (void)
         /* Remember if this is a relocatable memory area */
         M->Relocatable = RelocatableBinFmt (M->F->Format);
 
-        /* Resolve the start address expression, remember the start address
-         * and mark the memory area as placed.
-         */
+        /* Resolve the start address expression, remember the start address,
+        ** and mark the memory area as placed.
+        */
         if (!IsConstExpr (M->StartExpr)) {
             CfgError (GetSourcePos (M->LI),
                       "Start address of memory area `%s' is not constant",
@@ -1818,9 +1817,9 @@ unsigned CfgProcess (void)
         M->Flags |= MF_PLACED;
 
         /* If requested, define the symbol for the start of the memory area.
-         * Doing it here means that the expression for the size of the area
-         * may reference this symbol.
-         */
+        ** Doing it here means that the expression for the size of the area
+        ** may reference this symbol.
+        */
         if (M->Flags & MF_DEFINE) {
             Export* E;
             StrBuf Buf = STATIC_STRBUF_INITIALIZER;
@@ -1843,110 +1842,124 @@ unsigned CfgProcess (void)
 
         /* Walk through the segments in this memory area */
         for (J = 0; J < CollCount (&M->SegList); ++J) {
-
             /* Get the segment */
             SegDesc* S = CollAtUnchecked (&M->SegList, J);
 
             /* Remember the start address before handling this segment */
             unsigned long StartAddr = Addr;
 
-            /* Some actions depend on wether this is the load or run memory
-             * area.
-             */
+            /* Some actions depend on whether this is the load or run memory
+            ** area.
+            */
             if (S->Run == M) {
-
                 /* This is the run (and maybe load) memory area. Handle
-                 * alignment and explict start address and offset.
-                 */
+                ** alignment and explict start address and offset.
+                */
+
+                /* Check if the alignment for the segment from the linker
+                ** config. is a multiple for that of the segment.
+                */
+                if ((S->RunAlignment % S->Seg->Alignment) != 0) {
+                    /* Segment requires another alignment than configured
+                    ** in the linker.
+                    */
+                    CfgWarning (GetSourcePos (S->LI),
+                                "Segment `%s' isn't aligned properly; the"
+                                " resulting executable might not be functional.",
+                                GetString (S->Name));
+                }
+
                 if (S->Flags & SF_ALIGN) {
                     /* Align the address */
                     unsigned long NewAddr = AlignAddr (Addr, S->RunAlignment);
 
                     /* If the first segment placed in the memory area needs
-                     * fill bytes for the alignment, emit a warning, since
-                     * this is somewhat suspicious.
-                     */
+                    ** fill bytes for the alignment, emit a warning, since
+                    ** that is somewhat suspicious.
+                    */
                     if (M->FillLevel == 0 && NewAddr > Addr) {
                         CfgWarning (GetSourcePos (S->LI),
-                                    "First segment in memory area `%s' does "
-                                    "already need fill bytes for alignment",
+                                    "The first segment in memory area `%s' "
+                                    "needs fill bytes for alignment.",
                                     GetString (M->Name));
                     }
 
                     /* Use the aligned address */
                     Addr = NewAddr;
 
-                } else if (S->Flags & (SF_OFFSET | SF_START)) {
+                } else if ((S->Flags & (SF_OFFSET | SF_START)) != 0 &&
+                           (M->Flags & MF_OVERFLOW) == 0) {
                     /* Give the segment a fixed starting address */
                     unsigned long NewAddr = S->Addr;
+
                     if (S->Flags & SF_OFFSET) {
                         /* An offset was given, no address, make an address */
                         NewAddr += M->Start;
                     }
-                    if (Addr > NewAddr) {
+                    if (NewAddr < Addr) {
                         /* Offset already too large */
+                        ++Overflows;
                         if (S->Flags & SF_OFFSET) {
-                            CfgError (GetSourcePos (M->LI),
-                                      "Offset too small in `%s', segment `%s'",
-                                      GetString (M->Name),
-                                      GetString (S->Name));
+                            CfgWarning (GetSourcePos (S->LI),
+                                        "Segment `%s' offset is too small in `%s' by %lu byte%c",
+                                        GetString (S->Name), GetString (M->Name),
+                                        Addr - NewAddr, (Addr - NewAddr == 1) ? ' ' : 's');
                         } else {
-                            CfgError (GetSourcePos (M->LI),
-                                      "Start address too low in `%s', segment `%s'",
-                                      GetString (M->Name),
-                                      GetString (S->Name));
+                            CfgWarning (GetSourcePos (S->LI),
+                                        "Segment `%s' start address is too low in `%s' by %lu byte%c",
+                                        GetString (S->Name), GetString (M->Name),
+                                        Addr - NewAddr, (Addr - NewAddr == 1) ? ' ' : 's');
                         }
+                    } else {
+                        Addr = NewAddr;
                     }
-                    Addr = NewAddr;
                 }
 
                 /* Set the start address of this segment, set the readonly flag
-                 * in the segment and and remember if the segment is in a
-                 * relocatable file or not.
-                 */
+                ** in the segment, and remember if the segment is in a
+                ** relocatable file or not.
+                */
                 S->Seg->PC = Addr;
                 S->Seg->ReadOnly = (S->Flags & SF_RO) != 0;
 
                 /* Remember the run memory for this segment, which is also a
-                 * flag that the segment has been placed.
-                 */
+                ** flag that the segment has been placed.
+                */
                 S->Seg->MemArea = M;
 
             } else if (S->Load == M) {
-
-                /* This is the load memory area, *and* run and load are
-                 * different (because of the "else" above). Handle alignment.
-                 */
+                /* This is the load memory area; *and*, run and load are
+                ** different (because of the "else" above). Handle alignment.
+                */
                 if (S->Flags & SF_ALIGN_LOAD) {
                     /* Align the address */
                     Addr = AlignAddr (Addr, S->LoadAlignment);
                 }
-
             }
 
-            /* If this is the load memory area and the segment doesn't have a
-             * fill value defined, use the one from the memory area.
-             */
+            /* If this is the load memory area, and the segment doesn't have a
+            ** fill value defined, use the one from the memory area.
+            */
             if (S->Load == M && (S->Flags & SF_FILLVAL) == 0) {
                 S->Seg->FillVal = M->FillVal;
             }
 
-            /* Increment the fill level of the memory area and check for an
-             * overflow.
-             */
+            /* Increment the fill level of the memory area; and, check for an
+            ** overflow.
+            */
             M->FillLevel = Addr + S->Seg->Size - M->Start;
             if (M->FillLevel > M->Size && (M->Flags & MF_OVERFLOW) == 0) {
                 ++Overflows;
                 M->Flags |= MF_OVERFLOW;
                 CfgWarning (GetSourcePos (M->LI),
-                            "Memory area overflow in `%s', segment `%s' (%lu bytes)",
-                             GetString (M->Name), GetString (S->Name),
-                             M->FillLevel - M->Size);
+                            "Segment `%s' overflows memory area `%s' by %lu byte%c",
+                            GetString (S->Name), GetString (M->Name),
+                            M->FillLevel - M->Size, (M->FillLevel - M->Size == 1) ? ' ' : 's');
             }
 
             /* If requested, define symbols for the start and size of the
-             * segment.
-             */
+            ** segment.
+            */
             if (S->Flags & SF_DEFINE) {
                 if (S->Run == M && (S->Flags & SF_RUN_DEF) == 0) {
                     CreateRunDefines (S, Addr);
@@ -1960,18 +1973,17 @@ unsigned CfgProcess (void)
             Addr += S->Seg->Size;
 
             /* If this segment will go out to the file, or its place
-             * in the file will be filled, then increase the file size.
-             */
+            ** in the file will be filled, then increase the file size.
+            */
             if (S->Load == M &&
                 ((S->Flags & SF_BSS) == 0 || (M->Flags & MF_FILL) != 0)) {
                 M->F->Size += Addr - StartAddr;
             }
-
         }
 
-        /* If requested, define symbols for start, size and offset of the
-         * memory area
-         */
+        /* If requested, define symbols for start, size, and offset of the
+        ** memory area
+        */
         if (M->Flags & MF_DEFINE) {
             Export* E;
             StrBuf Buf = STATIC_STRBUF_INITIALIZER;
@@ -1987,8 +1999,8 @@ unsigned CfgProcess (void)
             CollAppend (&E->DefLines, M->LI);
 
             /* Define the file offset of the memory area. This isn't of much
-             * use for relocatable output files.
-             */
+            ** use for relocatable output files.
+            */
             if (!M->Relocatable) {
                 SB_Printf (&Buf, "__%s_FILEOFFS__", GetString (M->Name));
                 E = CreateConstExport (GetStrBufId (&Buf), M->FileOffs);
@@ -1999,9 +2011,9 @@ unsigned CfgProcess (void)
             SB_Done (&Buf);
         }
 
-        /* If we didn't have an overflow and are requested to fill the memory
-         * area, acount for that in the file size.
-         */
+        /* If we didn't have an overflow, and are requested to fill the memory
+        ** area, account for that in the file size.
+        */
         if ((M->Flags & MF_OVERFLOW) == 0 && (M->Flags & MF_FILL) != 0) {
             M->F->Size += (M->Size - M->FillLevel);
         }
@@ -2054,8 +2066,8 @@ void CfgWriteTarget (void)
             } else {
 
                 /* No output file. Walk through the list and mark all segments
-                 * loading into these memory areas in this file as dumped.
-                 */
+                ** loading into these memory areas in this file as dumped.
+                */
                 unsigned J;
                 for (J = 0; J < CollCount (&F->MemoryAreas); ++J) {
 

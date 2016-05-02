@@ -106,8 +106,8 @@ static void AddArg (CmdLine* L, char* Arg)
 
 static void ExpandFile (CmdLine* L, const char* Name)
 /* Add the contents of a file to the command line. Each line is a separate
- * argument with leading and trailing whitespace removed.
- */
+** argument with leading and trailing whitespace removed.
+*/
 {
     char Buf [256];
 
@@ -124,8 +124,8 @@ static void ExpandFile (CmdLine* L, const char* Name)
         const char* B = Buf;
 
         /* Skip trailing whitespace (this will also kill the newline that is
-         * appended by fgets().
-         */
+        ** appended by fgets().
+        */
         unsigned Len = strlen (Buf);
         while (Len > 0 && IsSpace (Buf [Len-1])) {
             --Len;
@@ -148,8 +148,8 @@ static void ExpandFile (CmdLine* L, const char* Name)
     }
 
     /* Close the file, ignore errors here since we had the file open for
-     * reading only.
-     */
+    ** reading only.
+    */
     (void) fclose (F);
 }
 
@@ -161,17 +161,17 @@ static void ExpandFile (CmdLine* L, const char* Name)
 
 
 
-void InitCmdLine (int* aArgCount, char** aArgVec[], const char* aProgName)
+void InitCmdLine (int* aArgCount, char*** aArgVec, const char* aProgName)
 /* Initialize command line parsing. aArgVec is the argument array terminated by
- * a NULL pointer (as usual), ArgCount is the number of valid arguments in the
- * array. Both arguments are remembered in static storage.
- */
+** a NULL pointer (as usual), ArgCount is the number of valid arguments in the
+** array. Both arguments are remembered in static storage.
+*/
 {
     CmdLine     L;
     int         I;
 
     /* Get the program name from argv[0] but strip a path */
-    if (*(aArgVec)[0] == 0) {
+    if ((*aArgVec)[0] == 0) {
         /* Use the default name given */
         ProgName = aProgName;
     } else {
@@ -187,10 +187,10 @@ void InitCmdLine (int* aArgCount, char** aArgVec[], const char* aProgName)
     NewCmdLine (&L);
 
     /* Walk over the parameters and add them to the CmdLine struct. Add a
-     * special handling for arguments preceeded by the '@' sign - these are
-     * actually files containing arguments.
-     */
-    for (I = 0; I < *aArgCount; ++I) {
+    ** special handling for arguments preceeded by the '@' sign - these are
+    ** actually files containing arguments.
+    */
+    for (I = 0; I <= *aArgCount; ++I) {
 
         /* Get the next argument */
         char* Arg = (*aArgVec)[I];
@@ -210,11 +210,11 @@ void InitCmdLine (int* aArgCount, char** aArgVec[], const char* aProgName)
     }
 
     /* Store the new argument list in a safe place... */
-    ArgCount = L.Count;
+    ArgCount = L.Count - 1;
     ArgVec   = L.Vec;
 
     /* ...and pass back the changed data also */
-    *aArgCount = L.Count;
+    *aArgCount = L.Count - 1;
     *aArgVec   = L.Vec;
 }
 
@@ -254,8 +254,8 @@ void InvDef (const char* Def)
 
 const char* GetArg (unsigned* ArgNum, unsigned Len)
 /* Get an argument for a short option. The argument may be appended to the
- * option itself or may be separate. Len is the length of the option string.
- */
+** option itself or may be separate. Len is the length of the option string.
+*/
 {
     const char* Arg = ArgVec[*ArgNum];
     if (Arg[Len] != '\0') {

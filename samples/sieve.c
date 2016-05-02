@@ -1,6 +1,6 @@
 /*
- * Calculate all primes up to a specific number.
- */
+** Calculate all primes up to a specific number.
+*/
 
 
 
@@ -110,7 +110,7 @@ int main (void)
                     J = 0;
                 }
             }
-            if (kbhit() && ReadUpperKey == 'Q') {
+            if (kbhit() && ReadUpperKey () == 'Q') {
                 break;
             }
         }

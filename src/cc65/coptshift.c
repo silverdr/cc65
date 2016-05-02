@@ -190,15 +190,14 @@ static unsigned GetShift (const char* Name)
 
 unsigned OptShift1 (CodeSeg* S)
 /* A call to the shlaxN routine may get replaced by one or more asl insns
- * if the value of X is not used later. If X is used later, but it is zero
- * on entry and it's a shift by one, it may get replaced by:
- *
- *      asl     a
- *      bcc     L1
- *      inx
- *  L1:
- *
- */
+** if the value of X is not used later. If X is used later, but it is zero
+** on entry and it's a shift by one, it may get replaced by:
+**
+**      asl     a
+**      bcc     L1
+**      inx
+**  L1:
+*/
 {
     unsigned Changes = 0;
     unsigned I;
@@ -233,12 +232,12 @@ unsigned OptShift1 (CodeSeg* S)
                     }
 
                     /* Change into
-                     *
-                     * L1:  asl     a
-                     *      dey
-                     *      bpl     L1
-                     *      ror     a
-                     */
+                    **
+                    ** L1:  asl     a
+                    **      dey
+                    **      bpl     L1
+                    **      ror     a
+                    */
 
                     /* asl a */
                     X = NewCodeEntry (OP65_ASL, AM65_ACC, "a", 0, E->LI);
@@ -308,60 +307,87 @@ NextEntry:
 
 
 
-unsigned OptShift2(CodeSeg* S)
-/* A call to the asrax1 routines may get replaced by something simpler, if
- * X is not used later:
- *
- *      cmp     #$80
- *      ror     a
- *
- */
+unsigned OptShift2 (CodeSeg* S)
+/* The sequence
+**
+**      bpl     L
+**      dex
+** L:   jsr     asraxN
+**
+** might be replaced by N copies of
+**
+**      cmp     #$80
+**      ror     a
+**
+** if X is not used later (X is assumed to be zero on entry).
+** If the sequence is followed immediately by another
+**
+**      jsr     asraxN
+**
+** then their shifts are combined.
+*/
 {
     unsigned Changes = 0;
-    unsigned I;
+    unsigned I = 0;
 
     /* Walk over the entries */
-    I = 0;
     while (I < CS_GetEntryCount (S)) {
-
         unsigned Shift;
-        unsigned Count;
+        unsigned Count, Count2;
+        unsigned K;
+        CodeEntry* L[4];
 
         /* Get next entry */
-        CodeEntry* E = CS_GetEntry (S, I);
+        L[0] = CS_GetEntry (S, I);
 
         /* Check for the sequence */
-        if (E->OPC == OP65_JSR                          &&
-            (Shift = GetShift (E->Arg)) != SHIFT_NONE   &&
-            SHIFT_TYPE (Shift) == SHIFT_TYPE_ASR        &&
-            (Count = SHIFT_COUNT (Shift)) > 0           &&
-            Count * 100 <= S->CodeSizeFactor    &&
-            !RegXUsed (S, I+1)) {
+        if ((L[0]->OPC == OP65_BPL || L[0]->OPC == OP65_BCC)            &&
+            L[0]->JumpTo != 0                                           &&
+            CS_GetEntries (S, L+1, I+1, 3)                              &&
+            L[1]->OPC == OP65_DEX                                       &&
+            L[0]->JumpTo->Owner == L[2]                                 &&
+            !CS_RangeHasLabel (S, I, 2)                                 &&
+            L[2]->OPC == OP65_JSR                                       &&
+            SHIFT_TYPE (Shift = GetShift (L[2]->Arg)) == SHIFT_TYPE_ASR &&
+            (Count = SHIFT_COUNT (Shift)) > 0) {
 
-            CodeEntry* X;
-            unsigned J = I+1;
+            if (L[3]->OPC == OP65_JSR                                           &&
+                SHIFT_TYPE (Shift = GetShift (L[3]->Arg)) == SHIFT_TYPE_ASR     &&
+                (Count2 = SHIFT_COUNT (Shift)) > 0) {
 
-            /* Generate the replacement sequence */
-            while (Count--) {
-                /* cmp #$80 */
-                X = NewCodeEntry (OP65_CMP, AM65_IMM, "$80", 0, E->LI);
-                CS_InsertEntry (S, X, J++);
-
-                /* ror a */
-                X = NewCodeEntry (OP65_ROR, AM65_ACC, "a", 0, E->LI);
-                CS_InsertEntry (S, X, J++);
+                /* Found a second jsr asraxN */
+                Count += Count2;
+                K = 4;
+            } else {
+                K = 3;
             }
+            if (Count * 100 <= S->CodeSizeFactor        &&
+                !RegXUsed (S, I+K)) {
 
-            /* Delete the call to asrax */
-            CS_DelEntry (S, I);
+                CodeEntry* X;
+                unsigned J = I+K;
 
-            /* Remember, we had changes */
-            ++Changes;
+                /* Generate the replacement sequence */
+                do {
+                    /* cmp #$80 */
+                    X = NewCodeEntry (OP65_CMP, AM65_IMM, "$80", 0, L[2]->LI);
+                    CS_InsertEntry (S, X, J++);
+
+                    /* ror a */
+                    X = NewCodeEntry (OP65_ROR, AM65_ACC, "a", 0, L[2]->LI);
+                    CS_InsertEntry (S, X, J++);
+                } while (--Count);
+
+                /* Remove the bpl/dex/jsr */
+                CS_DelEntries (S, I, K);
+
+                /* Remember, we had changes */
+                ++Changes;
+            }
         }
 
         /* Next entry */
         ++I;
-
     }
 
     /* Return the number of changes made */
@@ -372,21 +398,21 @@ unsigned OptShift2(CodeSeg* S)
 
 unsigned OptShift3 (CodeSeg* S)
 /* The sequence
- *
- *      bcc     L
- *      inx
- * L:   jsr     shrax1
- *
- * may get replaced by
- *
- *      ror     a
- *
- * if X is zero on entry. For shift counts > 1, more
- *
- *      shr     a
- *
- * must be added.
- */
+**
+**      bcc     L
+**      inx
+** L:   jsr     shrax1
+**
+** may get replaced by
+**
+**      ror     a
+**
+** if X is zero on entry. For shift counts > 1, more
+**
+**      shr     a
+**
+** must be added.
+*/
 {
     unsigned Changes = 0;
     unsigned I;
@@ -414,7 +440,7 @@ unsigned OptShift3 (CodeSeg* S)
             (Shift = GetShift (L[2]->Arg)) != SHIFT_NONE        &&
             SHIFT_DIR (Shift) == SHIFT_DIR_RIGHT                &&
             (Count = SHIFT_COUNT (Shift)) > 0) {
-                                                
+
             /* Add the replacement insn instead */
             CodeEntry* X = NewCodeEntry (OP65_ROR, AM65_ACC, "a", 0, L[2]->LI);
             CS_InsertEntry (S, X, I+3);
@@ -423,7 +449,7 @@ unsigned OptShift3 (CodeSeg* S)
                 CS_InsertEntry (S, X, I+4);
             }
 
-            /* Remove the bcs/dex/jsr */
+            /* Remove the bcc/inx/jsr */
             CS_DelEntries (S, I, 3);
 
             /* Remember, we had changes */
@@ -444,8 +470,8 @@ unsigned OptShift3 (CodeSeg* S)
 
 unsigned OptShift4 (CodeSeg* S)
 /* Calls to the asraxN or shraxN routines may get replaced by one or more lsr
- * insns if the value of X is zero.
- */
+** insns if the value of X is zero.
+*/
 {
     unsigned Changes = 0;
     unsigned I;
@@ -480,17 +506,17 @@ unsigned OptShift4 (CodeSeg* S)
                 }
 
                 /* Generate:
-                 *
-                 * L1: lsr     a
-                 *     dey
-                 *     bpl     L1
-                 *     rol     a
-                 *
-                 * A negative shift count or one that is greater or equal than
-                 * the bit width of the left operand (which is promoted to
-                 * integer before the operation) causes undefined behaviour, so
-                 * above transformation is safe.
-                 */
+                **
+                ** L1: lsr     a
+                **     dey
+                **     bpl     L1
+                **     rol     a
+                **
+                ** A negative shift count or one that is greater or equal than
+                ** the bit width of the left operand (which is promoted to
+                ** integer before the operation) causes undefined behaviour, so
+                ** above transformation is safe.
+                */
 
                 /* lsr a */
                 X = NewCodeEntry (OP65_LSR, AM65_ACC, "a", 0, E->LI);
@@ -540,24 +566,24 @@ NextEntry:
 
 unsigned OptShift5 (CodeSeg* S)
 /* Search for the sequence
- *
- *      lda     xxx
- *      ldx     yyy
- *      jsr     aslax1/asrax1/shlax1/shrax1
- *      sta     aaa
- *      stx     bbb
- *
- * and replace it by
- *
- *      lda     xxx
- *      asl     a
- *      sta     aaa
- *      lda     yyy
- *      rol     a
- *      sta     bbb
- *
- * or similar, provided that a/x is not used later
- */
+**
+**      lda     xxx
+**      ldx     yyy
+**      jsr     aslax1/asrax1/shlax1/shrax1
+**      sta     aaa
+**      stx     bbb
+**
+** and replace it by
+**
+**      lda     xxx
+**      asl     a
+**      sta     aaa
+**      lda     yyy
+**      rol     a
+**      sta     bbb
+**
+** or similar, provided that a/x is not used later
+*/
 {
     unsigned Changes = 0;
 
@@ -684,19 +710,19 @@ unsigned OptShift6 (CodeSeg* S)
             (Count = SHIFT_COUNT (Shift)) > 0) {
 
             /* Code is:
-             *
-             *      stx     tmp1
-             *      asl     a
-             *      rol     tmp1
-             *      (repeat ShiftCount-1 times)
-             *      ldx     tmp1
-             *
-             * which makes 4 + 3 * ShiftCount bytes, compared to the original
-             * 3 bytes for the subroutine call. However, in most cases, the
-             * final load of the X register gets merged with some other insn
-             * and replaces a txa, so for a shift count of 1, we get a factor
-             * of 200, which matches nicely the CodeSizeFactor enabled with -Oi
-             */
+            **
+            **      stx     tmp1
+            **      asl     a
+            **      rol     tmp1
+            **      (repeat ShiftCount-1 times)
+            **      ldx     tmp1
+            **
+            ** which makes 4 + 3 * ShiftCount bytes, compared to the original
+            ** 3 bytes for the subroutine call. However, in most cases, the
+            ** final load of the X register gets merged with some other insn
+            ** and replaces a txa, so for a shift count of 1, we get a factor
+            ** of 200, which matches nicely the CodeSizeFactor enabled with -Oi
+            */
             if (Count > 1 || S->CodeSizeFactor > 200) {
                 unsigned Size = 4 + 3 * Count;
                 if ((Size * 100 / 3) > S->CodeSizeFactor) {

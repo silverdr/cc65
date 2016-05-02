@@ -71,13 +71,13 @@ void __fastcall__ free (void* block);
 #if __CC65_STD__ == __CC65_STD_CC65__
 int __fastcall__ posix_memalign (void** memptr, size_t alignment, size_t size);
 /* Allocate a block of memory with the given "size", which is aligned to a
- * memory address that is a multiple of "alignment".  "alignment" MUST NOT be
- * zero, and MUST be a power of two; otherwise, this function will return
- * EINVAL.  The function returns ENOMEM if not enough memory is available
- * to satisfy the request.  "memptr" must point to a variable; that variable
- * will return the address of the allocated memory.  Use free() to release that
- * allocated block.
- */
+** memory address that is a multiple of "alignment".  "alignment" MUST NOT be
+** zero, and MUST be a power of two; otherwise, this function will return
+** EINVAL.  The function returns ENOMEM if not enough memory is available
+** to satisfy the request.  "memptr" must point to a variable; that variable
+** will return the address of the allocated memory.  Use free() to release that
+** allocated block.
+*/
 #endif
 
 void __fastcall__ _heapadd (void* mem, size_t size);
@@ -107,12 +107,12 @@ int __fastcall__ atoi (const char* s);
 long __fastcall__ atol (const char* s);
 int __fastcall__ atexit (void (*exitfunc) (void));
 void* __fastcall__ bsearch (const void* key, const void* base, size_t n,
-                            size_t size, int (*cmp) (const void*, const void*));
+                            size_t size, int __fastcall__ (* cmp) (const void*, const void*));
 div_t __fastcall__ div (int numer, int denom);
 void __fastcall__ exit (int ret) __attribute__ ((noreturn));
 char* __fastcall__ getenv (const char* name);
 void __fastcall__ qsort (void* base, size_t count, size_t size,
-                         int (*compare) (const void*, const void*));
+                         int __fastcall__ (* compare) (const void*, const void*));
 long __fastcall__ strtol (const char* nptr, char** endptr, int base);
 unsigned long __fastcall__ strtoul (const char* nptr, char** endptr, int base);
 int __fastcall__ system (const char* s);

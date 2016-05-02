@@ -63,6 +63,8 @@ static const char* FeatureKeys[FEAT_COUNT] = {
     "c_comments",
     "force_range",
     "underline_in_numbers",
+    "addrsize",
+    "bracket_as_indirect",
 };
 
 
@@ -75,8 +77,8 @@ static const char* FeatureKeys[FEAT_COUNT] = {
 
 feature_t FindFeature (const StrBuf* Key)
 /* Find the feature in a table and return the corresponding enum value. If the
- * feature is invalid, return FEAT_UNKNOWN.
- */
+** feature is invalid, return FEAT_UNKNOWN.
+*/
 {
     feature_t F;
 
@@ -96,9 +98,9 @@ feature_t FindFeature (const StrBuf* Key)
 
 feature_t SetFeature (const StrBuf* Key)
 /* Find the feature and set the corresponding flag if the feature is known.
- * In any case, return the feature found. An invalid Key will return
- * FEAT_UNKNOWN.
- */
+** In any case, return the feature found. An invalid Key will return
+** FEAT_UNKNOWN.
+*/
 {
     /* Map the string to an enum value */
     feature_t Feature = FindFeature (Key);
@@ -119,6 +121,8 @@ feature_t SetFeature (const StrBuf* Key)
         case FEAT_C_COMMENTS:                 CComments         = 1;    break;
         case FEAT_FORCE_RANGE:                ForceRange        = 1;    break;
         case FEAT_UNDERLINE_IN_NUMBERS:       UnderlineInNumbers= 1;    break;
+        case FEAT_ADDRSIZE:                   AddrSize          = 1;    break;
+        case FEAT_BRACKET_AS_INDIRECT:        BracketAsIndirect = 1;    break;
         default:                         /* Keep gcc silent */          break;
     }
 

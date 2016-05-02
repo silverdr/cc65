@@ -6,10 +6,10 @@
 /*                                                                           */
 /*                                                                           */
 /*                                                                           */
-/* (C) 1998-2008 Ullrich von Bassewitz                                       */
-/*               Roemerstrasse 52                                            */
-/*               D-70794 Filderstadt                                         */
-/* EMail:        uz@cc65.org                                                 */
+/* (C) 1998-2015, Ullrich von Bassewitz                                      */
+/*                Roemerstrasse 52                                           */
+/*                D-70794 Filderstadt                                        */
+/* EMail:         uz@cc65.org                                                */
 /*                                                                           */
 /*                                                                           */
 /* This software is provided 'as-is', without any expressed or implied       */
@@ -37,6 +37,7 @@
 
 /* cc65 */
 #include "funcdesc.h"
+#include "global.h"
 #include "symtab.h"
 #include "typecmp.h"
 
@@ -61,9 +62,9 @@ static void SetResult (typecmp_t* Result, typecmp_t Val)
 
 static int ParamsHaveDefaultPromotions (const FuncDesc* F)
 /* Check if any of the parameters of function F has a default promotion. In
- * this case, the function is not compatible with an empty parameter name list
- * declaration.
- */
+** this case, the function is not compatible with an empty parameter name list
+** declaration.
+*/
 {
     /* Get the symbol table */
     const SymTable* Tab = F->SymTab;
@@ -75,8 +76,8 @@ static int ParamsHaveDefaultPromotions (const FuncDesc* F)
     while (Sym && (Sym->Flags & SC_PARAM)) {
 
         /* If this is an integer type, check if the promoted type is equal
-         * to the original type. If not, we have a default promotion.
-         */
+        ** to the original type. If not, we have a default promotion.
+        */
         if (IsClassInt (Sym->Type)) {
             if (IntPromotion (Sym->Type) != Sym->Type) {
                 return 1;
@@ -95,8 +96,8 @@ static int ParamsHaveDefaultPromotions (const FuncDesc* F)
 
 static int EqualFuncParams (const FuncDesc* F1, const FuncDesc* F2)
 /* Compare two function symbol tables regarding function parameters. Return 1
- * if they are equal and 0 otherwise.
- */
+** if they are equal and 0 otherwise.
+*/
 {
     /* Get the symbol tables */
     const SymTable* Tab1 = F1->SymTab;
@@ -114,8 +115,8 @@ static int EqualFuncParams (const FuncDesc* F1, const FuncDesc* F2)
         Type* Type2 = Sym2->Type;
 
         /* If either of both functions is old style, apply the default
-         * promotions to the parameter type.
-         */
+        ** promotions to the parameter type.
+        */
         if (F1->Flags & FD_OLDSTYLE) {
             if (IsClassInt (Type1)) {
                 Type1 = IntPromotion (Type1);
@@ -139,8 +140,8 @@ static int EqualFuncParams (const FuncDesc* F1, const FuncDesc* F2)
     }
 
     /* Check both pointers against NULL or a non parameter to compare the
-     * field count
-     */
+    ** field count
+    */
     return (Sym1 == 0 || (Sym1->Flags & SC_PARAM) == 0) &&
            (Sym2 == 0 || (Sym2->Flags & SC_PARAM) == 0);
 }
@@ -222,8 +223,8 @@ static void DoCompare (const Type* lhs, const Type* rhs, typecmp_t* Result)
         RightQual = GetQualifier (rhs);
 
         /* If the left type is a pointer and the right is an array, both
-         * are compatible.
-         */
+        ** are compatible.
+        */
         if (LeftType == T_TYPE_PTR && RightType == T_TYPE_ARRAY) {
             RightType = T_TYPE_PTR;
         }
@@ -235,8 +236,8 @@ static void DoCompare (const Type* lhs, const Type* rhs, typecmp_t* Result)
         }
 
         /* On indirection level zero, a qualifier or sign difference is
-         * accepted. The types are no longer equal, but compatible.
-         */
+        ** accepted. The types are no longer equal, but compatible.
+        */
         if (LeftSign != RightSign) {
             if (ElementCount == 0) {
                 SetResult (Result, TC_SIGN_DIFF);
@@ -245,32 +246,49 @@ static void DoCompare (const Type* lhs, const Type* rhs, typecmp_t* Result)
                 return;
             }
         }
+
+        if (LeftType == T_TYPE_FUNC) {
+            /* If a calling convention wasn't set explicitly,
+            ** then assume the default one.
+            */
+            if ((LeftQual & T_QUAL_CCONV) == T_QUAL_NONE) {
+                LeftQual |= (AutoCDecl || IsVariadicFunc (lhs)) ? T_QUAL_CDECL : T_QUAL_FASTCALL;
+            }
+            if ((RightQual & T_QUAL_CCONV) == T_QUAL_NONE) {
+                RightQual |= (AutoCDecl || IsVariadicFunc (rhs)) ? T_QUAL_CDECL : T_QUAL_FASTCALL;
+            }
+        }
+
         if (LeftQual != RightQual) {
             /* On the first indirection level, different qualifiers mean
-             * that the types are still compatible. On the second level,
-             * this is a (maybe minor) error, so we create a special
-             * return code, since a qualifier is dropped from a pointer.
-             * Starting from the next level, the types are incompatible
-             * if the qualifiers differ.
-             */
+            ** that the types still are compatible. On the second level,
+            ** that is a (maybe minor) error. We create a special return-code
+            ** if a qualifier is dropped from a pointer. But, different calling
+            ** conventions are incompatible. Starting from the next level,
+            ** the types are incompatible if the qualifiers differ.
+            */
+            /* (Debugging statement) */
             /* printf ("Ind = %d    %06X != %06X\n", Indirections, LeftQual, RightQual); */
             switch (Indirections) {
-
                 case 0:
                     SetResult (Result, TC_STRICT_COMPATIBLE);
                     break;
 
                 case 1:
-                    /* A non const value on the right is compatible to a
-                     * const one to the left, same for volatile.
-                     */
+                    /* A non-const value on the right is compatible to a
+                    ** const one to the left, same for volatile.
+                    */
                     if ((LeftQual & T_QUAL_CONST) < (RightQual & T_QUAL_CONST) ||
                         (LeftQual & T_QUAL_VOLATILE) < (RightQual & T_QUAL_VOLATILE)) {
                         SetResult (Result, TC_QUAL_DIFF);
                     } else {
                         SetResult (Result, TC_STRICT_COMPATIBLE);
                     }
-                    break;
+
+                    if (LeftType != T_TYPE_FUNC || (LeftQual & T_QUAL_CCONV) == (RightQual & T_QUAL_CCONV)) {
+                        break;
+                    }
+                    /* else fall through */
 
                 default:
                     SetResult (Result, TC_INCOMPATIBLE);
@@ -280,7 +298,6 @@ static void DoCompare (const Type* lhs, const Type* rhs, typecmp_t* Result)
 
         /* Check for special type elements */
         switch (LeftType) {
-
             case T_TYPE_PTR:
                 ++Indirections;
                 break;
@@ -291,13 +308,13 @@ static void DoCompare (const Type* lhs, const Type* rhs, typecmp_t* Result)
                 F2 = GetFuncDesc (rhs);
 
                 /* If one of both functions has an empty parameter list (which
-                 * does also mean, it is not a function definition, because the
-                 * flag is reset in this case), it is considered equal to any
-                 * other definition, provided that the other has no default
-                 * promotions in the parameter list. If none of both parameter
-                 * lists is empty, we have to check the parameter lists and
-                 * other attributes.
-                 */
+                ** does also mean, it is not a function definition, because the
+                ** flag is reset in this case), it is considered equal to any
+                ** other definition, provided that the other has no default
+                ** promotions in the parameter list. If none of both parameter
+                ** lists is empty, we have to check the parameter lists and
+                ** other attributes.
+                */
                 if (F1->Flags & FD_EMPTY) {
                     if ((F2->Flags & FD_EMPTY) == 0) {
                         if (ParamsHaveDefaultPromotions (F2)) {
@@ -348,9 +365,9 @@ static void DoCompare (const Type* lhs, const Type* rhs, typecmp_t* Result)
             case T_TYPE_STRUCT:
             case T_TYPE_UNION:
                 /* Compare the fields recursively. To do that, we fetch the
-                 * pointer to the struct definition from the type, and compare
-                 * the fields.
-                 */
+                ** pointer to the struct definition from the type, and compare
+                ** the fields.
+                */
                 Sym1 = GetSymEntry (lhs);
                 Sym2 = GetSymEntry (rhs);
 
@@ -368,9 +385,9 @@ static void DoCompare (const Type* lhs, const Type* rhs, typecmp_t* Result)
                 Tab2 = Sym2->V.S.SymTab;
 
                 /* One or both structs may be forward definitions. In this case,
-                 * the symbol tables are both non existant. Assume that the
-                 * structs are equal in this case.
-                 */
+                ** the symbol tables are both non existant. Assume that the
+                ** structs are equal in this case.
+                */
                 if (Tab1 != 0 && Tab2 != 0) {
 
                     if (EqualSymTables (Tab1, Tab2) == 0) {

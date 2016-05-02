@@ -2,7 +2,7 @@
 ; Driver for a "joystick mouse".
 ;
 ; 2009-09-26, Ullrich von Bassewitz
-; 2013-09-05, Greg King
+; 2014-09-10, Greg King
 ;
 
         .include        "zeropage.inc"
@@ -12,11 +12,13 @@
         .include        "cbm510.inc"
 
         .macpack        generic
+        .macpack        module
+
 
 ; ------------------------------------------------------------------------
 ; Header. Includes jump table
 
-.segment        "JUMPTABLE"
+        module_header   _cbm510_joy_mou
 
 HEADER:
 
@@ -264,7 +266,7 @@ BUTTONS:
 ; Bits go up when buttons go down.
 
         eor     #MOUSE_BTN_LEFT | MOUSE_BTN_RIGHT
-        ldx     #>0
+        ldx     #>$0000
         rts
 
 ;----------------------------------------------------------------------------
@@ -356,11 +358,11 @@ IRQ:    jsr     CPREP
 
         and     #JOY::RIGHT << 4        ; Check RIGHT bit
         bnz     @Right
-        lda     #<-1
+        lda     #<-$0001
         tax
         bnz     @AddX                   ; Branch always
-@Right: lda     #<1
-        ldx     #>1
+@Right: lda     #<$0001
+        ldx     #>$0001
 
 ; Calculate the new x co-ordinate (--> .YA).
 
@@ -399,11 +401,11 @@ IRQ:    jsr     CPREP
 
         and     #JOY::UP << 4           ; Check UP bit
         bze     @Down
-        lda     #<-1
+        lda     #<-$0001
         tax
         bnz     @AddY
-@Down:  lda     #<1
-        ldx     #>1
+@Down:  lda     #<$0001
+        ldx     #>$0001
 
 ; Calculate the new y co-ordinate (--> .YA).
 

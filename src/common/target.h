@@ -55,6 +55,7 @@ typedef enum {
     TGT_NONE,
     TGT_MODULE,
     TGT_ATARI,
+    TGT_ATARI5200,
     TGT_ATARIXL,
     TGT_VIC20,
     TGT_C16,
@@ -63,6 +64,7 @@ typedef enum {
     TGT_PLUS4,
     TGT_CBM510,
     TGT_CBM610,
+    TGT_OSIC1P,
     TGT_PET,
     TGT_BBC,
     TGT_APPLE2,
@@ -76,6 +78,8 @@ typedef enum {
     TGT_LYNX,
     TGT_SIM6502,
     TGT_SIM65C02,
+    TGT_PCENGINE,
+    TGT_GAMATE,
     TGT_COUNT                   /* Number of target systems */
 } target_t;
 
@@ -106,8 +110,8 @@ extern target_t         Target;
 
 target_t FindTarget (const char* Name);
 /* Find a target by name and return the target id. TGT_UNKNOWN is returned if
- * the given name is no valid target.
- */
+** the given name is no valid target.
+*/
 
 const TargetProperties* GetTargetProperties (target_t Target);
 /* Return the properties for a target */

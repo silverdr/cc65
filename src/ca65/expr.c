@@ -62,6 +62,7 @@
 #include "symtab.h"
 #include "toklist.h"
 #include "ulabel.h"
+#include "macro.h"
 
 
 
@@ -72,11 +73,11 @@
 
 
 /* Since all expressions are first packed into expression trees, and each
- * expression tree node is allocated on the heap, we add some type of special
- * purpose memory allocation here: Instead of freeing the nodes, we save some
- * number of freed nodes for later and remember them in a single linked list
- * using the Left link.
- */
+** expression tree node is allocated on the heap, we add some type of special
+** purpose memory allocation here: Instead of freeing the nodes, we save some
+** number of freed nodes for later and remember them in a single linked list
+** using the Left link.
+*/
 #define MAX_FREE_NODES  64
 static ExprNode*        FreeExprNodes = 0;
 static unsigned         FreeNodeCount = 0;
@@ -172,9 +173,9 @@ int IsFarRange (long Val)
 
 int IsEasyConst (const ExprNode* E, long* Val)
 /* Do some light checking if the given node is a constant. Don't care if E is
- * a complex expression. If E is a constant, return true and place its value
- * into Val, provided that Val is not NULL.
- */
+** a complex expression. If E is a constant, return true and place its value
+** into Val, provided that Val is not NULL.
+*/
 {
     /* Resolve symbols, follow symbol chains */
     while (E->Op == EXPR_SYMBOL) {
@@ -322,8 +323,8 @@ static ExprNode* Symbol (SymEntry* S)
         /* Mark the symbol as referenced */
         SymRef (S);
         /* If the symbol is a variable, return just its value, otherwise
-         * return a reference to the symbol.
-         */
+        ** return a reference to the symbol.
+        */
         if (SymIsVar (S)) {
             return CloneExpr (GetSymExpr (S));
         } else {
@@ -355,16 +356,16 @@ static ExprNode* FuncBlank (void)
 /* Handle the .BLANK builtin function */
 {
     /* We have a list of tokens that ends with the closing paren. Skip
-     * the tokens, and count them. Allow optionally curly braces.
-     */
+    ** the tokens, and count them. Allow optionally curly braces.
+    */
     token_t Term = GetTokListTerm (TOK_RPAREN);
     unsigned Count = 0;
     while (CurTok.Tok != Term) {
 
         /* Check for end of line or end of input. Since the calling function
-         * will check for the closing paren, we don't need to print an error
-         * here, just bail out.
-         */
+        ** will check for the closing paren, we don't need to print an error
+        ** here, just bail out.
+        */
         if (TokIsSep (CurTok.Tok)) {
             break;
         }
@@ -417,6 +418,26 @@ static ExprNode* FuncDefined (void)
 
 
 
+static ExprNode* FuncDefinedMacro (void)
+/* Handle the .DEFINEDMACRO builtin function */
+{
+    Macro* Mac = 0;
+
+    /* Check if the identifier is a macro */
+
+    if (CurTok.Tok == TOK_IDENT) {
+        Mac = FindMacro (&CurTok.SVal);
+    } else {
+        Error ("Identifier expected.");
+    }
+    /* Skip the name */
+    NextTok ();
+
+    return GenLiteralExpr (Mac != 0);
+}
+
+
+
 ExprNode* FuncHiByte (void)
 /* Handle the .HIBYTE builtin function */
 {
@@ -429,6 +450,36 @@ static ExprNode* FuncHiWord (void)
 /* Handle the .HIWORD builtin function */
 {
     return HiWord (Expression ());
+}
+
+
+
+static ExprNode* FuncIsMnemonic (void)
+/* Handle the .ISMNEMONIC, .ISMNEM builtin function */
+{
+    int Instr = -1;
+
+    /* Check for a macro or an instruction depending on UbiquitousIdents */
+
+    if (CurTok.Tok == TOK_IDENT) {
+        if (UbiquitousIdents) {
+            /* Macros CAN be instructions, so check for them first */
+            if (FindMacro (&CurTok.SVal) == 0) {
+                Instr = FindInstruction (&CurTok.SVal);
+            }
+        }
+        else {
+            /* Macros and symbols may NOT use the names of instructions, so just check for the instruction */
+            Instr = FindInstruction (&CurTok.SVal);
+        }
+    }
+    else {
+        Error ("Identifier expected.");
+    }
+    /* Skip the name */
+    NextTok ();
+
+    return GenLiteralExpr (Instr > 0);
 }
 
 
@@ -458,9 +509,9 @@ static ExprNode* DoMatch (enum TC EqualityLevel)
     TokNode* Node;
 
     /* A list of tokens follows. Read this list and remember it building a
-     * single linked list of tokens including attributes. The list is
-     * either enclosed in curly braces, or terminated by a comma.
-     */
+    ** single linked list of tokens including attributes. The list is
+    ** either enclosed in curly braces, or terminated by a comma.
+    */
     token_t Term = GetTokListTerm (TOK_COMMA);
     while (CurTok.Tok != Term) {
 
@@ -494,9 +545,9 @@ static ExprNode* DoMatch (enum TC EqualityLevel)
     }
 
     /* Read the second list which is optionally enclosed in curly braces and
-     * terminated by the right parenthesis. Compare each token against the
-     * one in the first list.
-     */
+    ** terminated by the right parenthesis. Compare each token against the
+    ** one in the first list.
+    */
     Term = GetTokListTerm (TOK_RPAREN);
     Result = 1;
     Node = Root;
@@ -629,6 +680,85 @@ static ExprNode* FuncReferenced (void)
 
 
 
+static ExprNode* FuncAddrSize (void)
+/* Handle the .ADDRSIZE function */
+{
+    StrBuf    ScopeName = STATIC_STRBUF_INITIALIZER;
+    StrBuf    Name = STATIC_STRBUF_INITIALIZER;
+    SymEntry* Sym;
+    int       AddrSize;
+    int       NoScope;
+
+
+    /* Assume we don't know the size */
+    AddrSize = 0;
+
+    /* Check for a cheap local which needs special handling */
+    if (CurTok.Tok == TOK_LOCAL_IDENT) {
+
+        /* Cheap local symbol */
+        Sym = SymFindLocal (SymLast, &CurTok.SVal, SYM_FIND_EXISTING);
+        if (Sym == 0) {
+            Error ("Unknown symbol or scope: `%m%p'", &CurTok.SVal);
+        } else {
+            AddrSize = Sym->AddrSize;
+        }
+
+        /* Remember and skip SVal, terminate ScopeName so it is empty */
+        SB_Copy (&Name, &CurTok.SVal);
+        NextTok ();
+        SB_Terminate (&ScopeName);
+
+    } else {
+
+        /* Parse the scope and the name */
+        SymTable* ParentScope = ParseScopedIdent (&Name, &ScopeName);
+
+        /* Check if the parent scope is valid */
+        if (ParentScope == 0) {
+            /* No such scope */
+            SB_Done (&ScopeName);
+            SB_Done (&Name);
+            return GenLiteral0 ();
+        }
+
+        /* If ScopeName is empty, no explicit scope was specified. We have to
+        ** search upper scope levels in this case.
+        */
+        NoScope = SB_IsEmpty (&ScopeName);
+
+        /* If we did find a scope with the name, read the symbol defining the
+        ** size, otherwise search for a symbol entry with the name and scope.
+        */
+        if (NoScope) {
+            Sym = SymFindAny (ParentScope, &Name);
+        } else {
+            Sym = SymFind (ParentScope, &Name, SYM_FIND_EXISTING);
+        }
+        /* If we found the symbol retrieve the size, otherwise complain */
+        if (Sym) {
+            AddrSize = Sym->AddrSize;
+        } else {
+            Error ("Unknown symbol or scope: `%m%p%m%p'", &ScopeName, &Name);
+        }
+
+    }
+
+    if (AddrSize == 0) {
+        Warning (1, "Unknown address size: `%m%p%m%p'", &ScopeName, &Name);
+    }
+
+    /* Free the string buffers */
+    SB_Done (&ScopeName);
+    SB_Done (&Name);
+
+    /* Return the size. */
+
+    return GenLiteralExpr (AddrSize);
+}
+
+
+
 static ExprNode* FuncSizeOf (void)
 /* Handle the .SIZEOF function */
 {
@@ -674,8 +804,8 @@ static ExprNode* FuncSizeOf (void)
         }
 
         /* If ScopeName is empty, no explicit scope was specified. We have to
-         * search upper scope levels in this case.
-         */
+        ** search upper scope levels in this case.
+        */
         NoScope = SB_IsEmpty (&ScopeName);
 
         /* First search for a scope with the given name */
@@ -686,8 +816,8 @@ static ExprNode* FuncSizeOf (void)
         }
 
         /* If we did find a scope with the name, read the symbol defining the
-         * size, otherwise search for a symbol entry with the name and scope.
-         */
+        ** size, otherwise search for a symbol entry with the name and scope.
+        */
         if (Scope) {
             /* Yep, it's a scope */
             SizeSym = GetSizeOfScope (Scope);
@@ -755,8 +885,8 @@ static ExprNode* FuncStrAt (void)
     }
 
     /* Get the char, handle as unsigned. Be sure to translate it into
-     * the target character set.
-     */
+    ** the target character set.
+    */
     C = TgtTranslateChar (SB_At (&Str, (unsigned)Index));
 
 ExitPoint:
@@ -803,16 +933,16 @@ static ExprNode* FuncTCount (void)
 /* Handle the .TCOUNT function */
 {
     /* We have a list of tokens that ends with the closing paren. Skip
-     * the tokens, and count them. Allow optionally curly braces.
-     */
+    ** the tokens, and count them. Allow optionally curly braces.
+    */
     token_t Term = GetTokListTerm (TOK_RPAREN);
     int Count = 0;
     while (CurTok.Tok != Term) {
 
         /* Check for end of line or end of input. Since the calling function
-         * will check for the closing paren, we don't need to print an error
-         * here, just bail out.
-         */
+        ** will check for the closing paren, we don't need to print an error
+        ** here, just bail out.
+        */
         if (TokIsSep (CurTok.Tok)) {
             break;
         }
@@ -965,6 +1095,19 @@ static ExprNode* Factor (void)
             N = Function (FuncBankByte);
             break;
 
+        case TOK_ADDRSIZE:
+            N = Function (FuncAddrSize);
+            break;
+
+        case TOK_ASIZE:
+            if (GetCPU () != CPU_65816) {
+                N = GenLiteralExpr (8);
+            } else {
+                N = GenLiteralExpr (ExtBytes[AM65I_IMM_ACCU] * 8);
+            }
+            NextTok ();
+            break;
+
         case TOK_BLANK:
             N = Function (FuncBlank);
             break;
@@ -982,12 +1125,29 @@ static ExprNode* Factor (void)
             N = Function (FuncDefined);
             break;
 
+        case TOK_DEFINEDMACRO:
+            N = Function (FuncDefinedMacro);
+            break;
+
         case TOK_HIBYTE:
             N = Function (FuncHiByte);
             break;
 
         case TOK_HIWORD:
             N = Function (FuncHiWord);
+            break;
+
+        case TOK_ISMNEMONIC:
+            N = Function (FuncIsMnemonic);
+            break;
+
+        case TOK_ISIZE:
+            if (GetCPU () != CPU_65816) {
+                N = GenLiteralExpr (8);
+            } else {
+                N = GenLiteralExpr (ExtBytes[AM65I_IMM_INDEX] * 8);
+            }
+            NextTok ();
             break;
 
         case TOK_LOBYTE:
@@ -1131,8 +1291,8 @@ static ExprNode* Term (void)
             }
 
             /* Generate a literal expression and delete the old left and
-             * right sides.
-             */
+            ** right sides.
+            */
             FreeExpr (Left);
             FreeExpr (Right);
             Root = GenLiteralExpr (Val);
@@ -1198,8 +1358,8 @@ static ExprNode* SimpleExpr (void)
             }
 
             /* Generate a literal expression and delete the old left and
-             * right sides.
-             */
+            ** right sides.
+            */
             FreeExpr (Left);
             FreeExpr (Right);
             Root = GenLiteralExpr (Val);
@@ -1264,8 +1424,8 @@ static ExprNode* BoolExpr (void)
             }
 
             /* Generate a literal expression and delete the old left and
-             * right sides.
-             */
+            ** right sides.
+            */
             FreeExpr (Left);
             FreeExpr (Right);
             Root = GenLiteralExpr (Val);
@@ -1327,8 +1487,8 @@ static ExprNode* Expr2 (void)
             }
 
             /* Generate a literal expression and delete the old left and
-             * right sides.
-             */
+            ** right sides.
+            */
             FreeExpr (Left);
             FreeExpr (Right);
             Root = GenLiteralExpr (Val);
@@ -1385,8 +1545,8 @@ static ExprNode* Expr1 (void)
             }
 
             /* Generate a literal expression and delete the old left and
-             * right sides.
-             */
+            ** right sides.
+            */
             FreeExpr (Left);
             FreeExpr (Right);
             Root = GenLiteralExpr (Val);
@@ -1453,8 +1613,8 @@ static ExprNode* Expr0 (void)
 
 ExprNode* Expression (void)
 /* Evaluate an expression, build the expression tree on the heap and return
- * a pointer to the root of the tree.
- */
+** a pointer to the root of the tree.
+*/
 {
     return Expr0 ();
 }
@@ -1463,9 +1623,9 @@ ExprNode* Expression (void)
 
 long ConstExpression (void)
 /* Parse an expression. Check if the expression is const, and print an error
- * message if not. Return the value of the expression, or a dummy, if it is
- * not constant.
- */
+** message if not. Return the value of the expression, or a dummy, if it is
+** not constant.
+*/
 {
     long Val;
 
@@ -1620,8 +1780,8 @@ ExprNode* GenSwapExpr (ExprNode* Expr)
 
 ExprNode* GenBranchExpr (unsigned Offs)
 /* Return an expression that encodes the difference between current PC plus
- * offset and the target expression (that is, Expression() - (*+Offs) ).
- */
+** offset and the target expression (that is, Expression() - (*+Offs) ).
+*/
 {
     ExprNode* N;
     ExprNode* Root;
@@ -1637,11 +1797,11 @@ ExprNode* GenBranchExpr (unsigned Offs)
         FreeExpr (N);
 
         /* Generate the final expression:
-         * Val - (* + Offs)
-         * Val - ((Seg + PC) + Offs)
-         * Val - Seg - PC - Offs
-         * (Val - PC - Offs) - Seg
-         */
+        ** Val - (* + Offs)
+        ** Val - ((Seg + PC) + Offs)
+        ** Val - Seg - PC - Offs
+        ** (Val - PC - Offs) - Seg
+        */
         Root = GenLiteralExpr (Val - GetPC () - Offs);
         if (GetRelocMode ()) {
             N = Root;
@@ -1653,11 +1813,11 @@ ExprNode* GenBranchExpr (unsigned Offs)
     } else {
 
         /* Generate the expression:
-         * N - (* + Offs)
-         * N - ((Seg + PC) + Offs)
-         * N - Seg - PC - Offs
-         * N - (PC + Offs) - Seg
-         */
+        ** N - (* + Offs)
+        ** N - ((Seg + PC) + Offs)
+        ** N - Seg - PC - Offs
+        ** N - (PC + Offs) - Seg
+        */
         Root = NewExprNode (EXPR_MINUS);
         Root->Left  = N;
         Root->Right = GenLiteralExpr (GetPC () + Offs);
@@ -1759,9 +1919,9 @@ ExprNode* GenNE (ExprNode* Expr, long Val)
 
 int IsConstExpr (ExprNode* Expr, long* Val)
 /* Return true if the given expression is a constant expression, that is, one
- * with no references to external symbols. If Val is not NULL and the
- * expression is constant, the constant value is stored here.
- */
+** with no references to external symbols. If Val is not NULL and the
+** expression is constant, the constant value is stored here.
+*/
 {
     int IsConst;
 
@@ -1785,8 +1945,8 @@ int IsConstExpr (ExprNode* Expr, long* Val)
 
 ExprNode* CloneExpr (ExprNode* Expr)
 /* Clone the given expression tree. The function will simply clone symbol
- * nodes, it will not resolve them.
- */
+** nodes, it will not resolve them.
+*/
 {
     ExprNode* Clone;
 
@@ -1843,8 +2003,8 @@ void WriteExpr (ExprNode* Expr)
     }
 
     /* If the is a leafnode, write the expression attribute, otherwise
-     * write the expression operands.
-     */
+    ** write the expression operands.
+    */
     switch (Expr->Op) {
 
         case EXPR_LITERAL:
@@ -1884,12 +2044,12 @@ void WriteExpr (ExprNode* Expr)
 
 void ExprGuessedAddrSize (const ExprNode* Expr, unsigned char AddrSize)
 /* Mark the address size of the given expression tree as guessed. The address
- * size passed as argument is the one NOT used, because the actual address
- * size wasn't known. Example: Zero page addressing was not used because symbol
- * is undefined, and absolute addressing was available.
- * This function will actually parse the expression tree for undefined symbols,
- * and mark these symbols accordingly.
- */
+** size passed as argument is the one NOT used, because the actual address
+** size wasn't known. Example: Zero page addressing was not used because symbol
+** is undefined, and absolute addressing was available.
+** This function will actually parse the expression tree for undefined symbols,
+** and mark these symbols accordingly.
+*/
 {
     /* Accept NULL expressions */
     if (Expr == 0) {

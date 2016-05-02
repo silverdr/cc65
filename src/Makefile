@@ -2,16 +2,17 @@ ifneq ($(shell echo),)
   CMD_EXE = 1
 endif
 
-PROGS = ar65  \
-        ca65  \
-        cc65  \
-        cl65  \
-        co65  \
-        da65  \
-        grc65 \
-        ld65  \
-        od65  \
-        sim65 \
+PROGS = ar65     \
+        ca65     \
+        cc65     \
+        chrcvt65 \
+        cl65     \
+        co65     \
+        da65     \
+        grc65    \
+        ld65     \
+        od65     \
+        sim65    \
         sp65
 
 .PHONY: all mostlyclean clean install zip avail unavail bin $(PROGS)
@@ -27,6 +28,17 @@ LD65_LIB = $(datadir)/lib
 LD65_OBJ = $(datadir)/lib
 LD65_CFG = $(datadir)/cfg
 
+ifdef CMD_EXE
+  NULLDEV = nul:
+  DIRLIST = $(strip $(foreach dir,$1,$(wildcard $(dir))))
+  MKDIR = mkdir $(subst /,\,$1)
+  RMDIR = $(if $(DIRLIST),rmdir /s /q $(subst /,\,$(DIRLIST)))
+else
+  NULLDEV = /dev/null
+  MKDIR = mkdir -p $1
+  RMDIR = $(RM) -r $1
+endif
+
 CC = $(CROSS_COMPILE)gcc
 AR = $(CROSS_COMPILE)ar
 
@@ -39,13 +51,15 @@ ifdef USER_CFLAGS
   $(info USER_CFLAGS: $(USER_CFLAGS))
 endif
 
-ifndef GIT_SHA
-  GIT_SHA := $(if $(wildcard ../.git),$(shell git rev-parse --short HEAD))
+ifdef GIT_SHA
+  $(info GIT_SHA: $(GIT_SHA))
+else
+  GIT_SHA := $(shell git rev-parse --short HEAD 2>$(NULLDEV))
   ifneq ($(words $(GIT_SHA)),1)
     GIT_SHA := N/A
+    $(info GIT_SHA: N/A)
   endif
 endif
-$(info GIT_SHA: $(GIT_SHA))
 
 CFLAGS += -MMD -MP -O -I common \
           -Wall -Wextra -Wno-char-subscripts $(USER_CFLAGS) \
@@ -60,15 +74,6 @@ endif
 
 ifdef CROSS_COMPILE
   EXE_SUFFIX=.exe
-endif
-
-ifdef CMD_EXE
-  DIRLIST = $(strip $(foreach dir,$1,$(wildcard $(dir))))
-  MKDIR = mkdir $(subst /,\,$1)
-  RMDIR = $(if $(DIRLIST),rmdir /s /q $(subst /,\,$(DIRLIST)))
-else
-  MKDIR = mkdir -p $1
-  RMDIR = $(RM) -r $1
 endif
 
 all bin: $(PROGS)
